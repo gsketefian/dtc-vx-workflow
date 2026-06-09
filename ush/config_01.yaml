@@ -1,0 +1,1051 @@
+#----------------------------
+# Test description
+#----------------------------
+metadata:
+  description: >-
+    Default configuration for an experiment. The valid values for most of the
+    parameters are specified in valid_param_vals.yaml
+###
+# USER-related configuration parameters
+#
+user:
+
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Set machine and queue parameters.  Definitions:
+  #
+  # MACHINE:
+  # Machine on which the workflow will run. If you are NOT on a named,
+  # supported platform, and you want to use the Rocoto workflow manager,
+  # you will need set MACHINE: "linux" and WORKFLOW_MANAGER: "rocoto". This
+  # combination will assume a Slurm batch manager when generating the XML.
+  # Please see ush/valid_param_vals.yaml for a full list of supported
+  # platforms.
+  #
+  # ACCOUNT:
+  # The account under which to submit jobs to the queue.
+  #
+  # HOMEdir: 
+  # The path to the user's vx workflow clone. This path 
+  # is set in ush/setup.py as the parent directory to USHdir. 
+  #
+  # USHdir: 
+  # The path to the user's ush directory in their vx workflow clone. 
+  # This path is set automatically in the main function of setup.py and 
+  # corresponds to the location of setup.py (i.e., the ush directory).
+  # 
+  # SCRIPTSdir: 
+  # The path to the user's scripts directory in their vx workflow clone.
+  # 
+  # JOBSdir: 
+  # The path to the user's jobs directory in their vx workflow clone.
+  # 
+  # PARMdir: 
+  # The path to the user's parm directory in their vx workflow clone.
+  # 
+  # METPLUS_CONF: 
+  # The path to the user's final METplus configuration file. By default, 
+  # METplus configuration files reside in parm/metplus.
+  #  
+  #-----------------------------------------------------------------------
+  MACHINE: "BIG_COMPUTER"
+  ACCOUNT: ""
+
+  HOMEdir: '{{ user.HOMEdir }}'
+  USHdir: '{{ user.USHdir }}'
+  SCRIPTSdir: '{{ user.HOMEdir }}/scripts'
+  JOBSdir: '{{ user.HOMEdir }}/jobs'
+  PARMdir: '{{ user.HOMEdir }}/parm'
+  METPLUS_CONF: '{{ user.PARMdir }}/metplus'
+
+#----------------------------
+# PLATFORM config parameters
+#-----------------------------
+platform:
+  #
+  #-----------------------------------------------------------------------
+  #
+  # WORKFLOW_MANAGER:
+  # The workflow manager to use (e.g., rocoto). This is set to "none" by
+  # default, but if the machine name is set to a platform that supports
+  # Rocoto, this will be overwritten and set to "rocoto". If set
+  # explicitly to "rocoto" along with the use of the MACHINE: "linux" target,
+  # the configuration layer assumes a Slurm batch manager when generating
+  # the XML. Valid options: "rocoto" or "none"
+  #
+  # NCORES_PER_NODE:
+  # The number of cores available per node on the compute platform, now 
+  # configurable for all platforms.
+  #
+  # TASKTHROTTLE:
+  # The number of active tasks run simultaneously. For linux/mac setting this
+  # to 1 makes sense
+  #
+  # CYCLETHROTTLE:
+  # The number of active cycles to run simultaneously. For linux/mac setting this
+  # to 1 makes sense
+  #
+  # BUILD_VER_FN:
+  # File name containing the version of the modules used for building the App.
+  # Currently, only WCOSS2 uses this file.
+  #
+  # RUN_VER_FN:
+  # File name containing the version of the modules used for running the App.
+  # Currently, only WCOSS2 uses this file.
+  #
+  # SCHED:
+  # The job scheduler to use (e.g., Slurm). Set this to an empty string in
+  # order for the experiment generation script to set it depending on the
+  # machine.
+  #
+  # PARTITION_DEFAULT:
+  # If using the slurm job scheduler (i.e. if SCHED is set to "slurm"), 
+  # the default partition to which to submit workflow tasks.  If a task 
+  # does not have a specific variable that specifies the partition to which 
+  # it will be submitted (e.g. PARTITION_HPSS, PARTITION_FCST; see below), 
+  # it will be submitted to the partition specified by this variable.  If 
+  # this is not set or is set to an empty string, it will be (re)set to a 
+  # machine-dependent value.  This is not used if SCHED is not set to 
+  # "slurm".
+  #
+  # QUEUE_DEFAULT:
+  # The default queue or QOS (if using the slurm job scheduler, where QOS
+  # is Quality of Service) to which workflow tasks are submitted.  If a 
+  # task does not have a specific variable that specifies the queue to which 
+  # it will be submitted (e.g. QUEUE_HPSS, QUEUE_FCST; see below), it will 
+  # be submitted to the queue specified by this variable.  If this is not 
+  # set or is set to an empty string, it will be (re)set to a machine-
+  # dependent value.
+  #
+  # PARTITION_HPSS:
+  # If using the slurm job scheduler (i.e. if SCHED is set to "slurm"), 
+  # Tasks that get or create links to external 
+  # model files [which are needed to generate initial conditions (ICs) and 
+  # lateral boundary conditions (LBCs)] are submitted to this partition.  If this is not set 
+  # or is set to an empty string, it will be (re)set to a machine-dependent 
+  # value.  This is not used if SCHED is not set to "slurm".
+  #
+  # QUEUE_HPSS:
+  # Tasks that get or create links to external 
+  # model files [which are needed to generate initial conditions (ICs) and 
+  # lateral boundary conditions (LBCs)] are submitted to this queue or QOS.  If this is not set 
+  # or is set to an empty string, it will be (re)set to a machine-dependent 
+  # value.
+  #
+  # REMOVE_MEMORY:
+  # Boolean flag determining whether to remove the memory flag for the
+  # Rocoto XML. Some platforms are not configured to accept the memory
+  # flag, so must not be included at all in the XML.
+  #-----------------------------------------------------------------------
+  #
+  WORKFLOW_MANAGER: ""
+  NCORES_PER_NODE: ""
+  TASKTHROTTLE: 1000
+  CYCLETHROTTLE: 200
+  BUILD_VER_FN: 'build.ver.{{ user.MACHINE|lower() }}'
+  RUN_VER_FN: 'run.ver.{{ user.MACHINE|lower() }}'
+  SCHED: ""
+  PARTITION_DEFAULT: ""
+  QUEUE_DEFAULT: ""
+  PARTITION_HPSS: ""
+  QUEUE_HPSS: ""
+  REMOVE_MEMORY: False
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Set run commands for platforms without a workflow manager. These values
+  # will be ignored unless WORKFLOW_MANAGER: "none".  Definitions:
+  #
+  # RUN_CMD_PRDGEN: 
+  # The run command for the product generation job.
+  #
+  # RUN_CMD_SERIAL:
+  # The run command for some serial jobs 
+  #
+  #-----------------------------------------------------------------------
+  #
+  RUN_CMD_SERIAL: ""
+  RUN_CMD_PRDGEN: ""
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Allows an extra parameter to be passed to SCHEDULER (SLURM/PBSPRO) via 
+  # XML Native command
+  #
+  SCHED_NATIVE_CMD: ""
+  #
+  #-----------------------------------------------------------------------
+  # Pre task commands such as "ulimit" needed by tasks
+  #-----------------------------------------------------------------------
+  #
+  PRE_TASK_CMDS: ""
+  #
+  #-----------------------------------------------------------------------
+  # MET and METplus directories
+  #-----------------------------------------------------------------------
+  MET_INSTALL_DIR: ''
+  METPLUS_ROOT: ''
+  #
+  #-----------------------------------------------------------------------
+  # Test directories used in run_WE2E script
+  #-----------------------------------------------------------------------
+  # TEST_EXTRN_MDL_SOURCE_BASEDIR: 
+  # This parameter allows testing of user-staged files in a known location 
+  # on a given platform. This path contains a limited dataset and likely 
+  # will not be useful for most user experiments. 
+  # 
+  # TEST_ALT_EXTRN_MDL_SYSBASEDIR_ICS: 
+  # This parameter is used to test the mechanism that allows users to 
+  # point to a data stream on disk. It sets up a sandbox location that 
+  # mimics the stream in a more controlled way and tests the ability 
+  # to access ICS. 
+  # 
+  # TEST_ALT_EXTRN_MDL_SYSBASEDIR_LBCS: 
+  # This parameter is used to test the mechanism that allows users to 
+  # point to a data stream on disk. It sets up a sandbox location that 
+  # mimics the stream in a more controlled way and tests the ability 
+  # to access LBCS.
+  # 
+  # TEST_*_OBS_DIR:
+  # These parameters are used by the WE2E testing script to test the mechanism
+  # that allows user to point to data streams on disk for observation data 
+  # for verification tasks. They test the ability for users to manually set 
+  # these observation directories.
+  # 
+  # STAGED_DATA:
+  # The base path to staged test data for WE2E testing.
+  #
+  #-----------------------------------------------------------------------
+  #
+  TEST_EXTRN_MDL_SOURCE_BASEDIR: ""
+  TEST_ALT_EXTRN_MDL_SYSBASEDIR_ICS: ""
+  TEST_ALT_EXTRN_MDL_SYSBASEDIR_LBCS: ""
+  TEST_CCPA_OBS_DIR: ""
+  TEST_MRMS_OBS_DIR: ""
+  TEST_NDAS_OBS_DIR: ""
+  TEST_NOHRSC_OBS_DIR: ""
+  TEST_AERONET_OBS_DIR: ""
+  TEST_AIRNOW_OBS_DIR: ""
+  STAGED_DATA: ""
+  #
+  #-----------------------------------------------------------------------
+  #
+  # EXTRN_MDL_DATA_STORES:
+  # A space-separated list of data stores where the scripts should look for
+  # external model data. The list is in priority order. If disk information
+  # is provided via USE_USER_STAGED_EXTRN_FILES or a known location on the
+  # platform, the disk location will be highest priority. Options are disk,
+  # hpss, aws, and nomads.
+  #
+  #-----------------------------------------------------------------------
+  #
+  EXTRN_MDL_DATA_STORES: ""
+
+#-----------------------------
+# WORKFLOW config parameters
+#-----------------------------
+workflow:
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Set the default workflow tasks to run in the experiment.
+  #
+  #-----------------------------------------------------------------------
+  #
+  taskgroups:
+    - parm/wflow/verify_pre.yaml
+    - parm/wflow/verify_det.yaml
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Unique ID for workflow run that will be set in setup.py
+  #
+  #-----------------------------------------------------------------------
+  #
+  WORKFLOW_ID: ""
+  #
+  #-----------------------------------------------------------------------
+  #
+  # How to make links. Relative links by default. Empty string for
+  # absolute paths in links.
+  #
+  #-----------------------------------------------------------------------
+  #
+  RELATIVE_LINK_FLAG: "--relative"
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Set cron-associated parameters.  Definitions:
+  #
+  # USE_CRON_TO_RELAUNCH:
+  # Flag that determines whether to add a line to the user's cron 
+  # table to call the experiment launch script every CRON_RELAUNCH_INTVL_MNTS 
+  # minutes.
+  #
+  # CRON_RELAUNCH_INTVL_MNTS:
+  # The interval (in minutes) between successive calls of the experiment
+  # launch script by a cron job to (re)launch the experiment (so that the
+  # workflow for the experiment kicks off where it left off).
+  #
+  # CRONTAB_LINE: 
+  # The launch command that will appear in the crontab
+  #
+  #-----------------------------------------------------------------------
+  #
+  USE_CRON_TO_RELAUNCH: false
+  CRON_RELAUNCH_INTVL_MNTS: 3
+  CRONTAB_LINE: ""
+
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Set directories.  Definitions:
+  #
+  # EXPT_BASEDIR:
+  # The base directory in which the experiment directory will be created.  
+  # If this is not specified or if it is set to an empty string, it will
+  # default to ${HOMEdir}/../expt_dirs. If set to a relative path, the
+  # path will be appended to the default value ${HOMEdir}/../expt_dirs 
+  #
+  # EXPT_SUBDIR:
+  # If EXPTDIR is not specified, this represents the experiment directory 
+  # (not the full path)
+  #
+  # EXPTDIR:
+  # The full path to the experiment directory. Can be user-specified, but by
+  # default will point to:
+  #
+  #   EXPTDIR: "${EXPT_BASEDIR}/${EXPT_SUBDIR}"
+  #
+  # WFLOW_FLAG_FILES_DIR:
+  # Directory in which flag files marking completion of various workflow
+  # tasks can be placed.
+  #-----------------------------------------------------------------------
+  #
+  EXPT_BASEDIR: '' # This will be set in setup.py prior to extend_yaml() being called
+  EXPT_SUBDIR: 'experiment'
+  EXPTDIR: '{{ workflow.EXPT_BASEDIR }}/{{ workflow.EXPT_SUBDIR }}'
+  WFLOW_FLAG_FILES_DIR: '{{ workflow.EXPTDIR }}/wflow_flag_files'
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Set file names.  Definitions:
+  #
+  #-----------------------------------------------------------------------
+  # These are staged in the exptdir at configuration time
+  # 
+  # WFLOW_XML_FN:
+  # Name of the rocoto workflow XML file that the experiment generation
+  # script creates and that defines the workflow for the experiment.
+  #
+  # GLOBAL_VAR_DEFNS_FN:
+  # Name of the experiment configuration file. It contains the primary
+  # experiment variables defined in this default configuration script and in the
+  # user-specified configuration as well as secondary experiment variables
+  # generated by the experiment generation script. This file is the primary
+  # source of information used in the scripts at run time.
+  #
+  # ROCOTO_YAML_FN:
+  # Name of the YAML file containing the YAML workflow definition from
+  # which the Rocoto XML file is created.
+  #
+  # EXTRN_MDL_VAR_DEFNS_FN:
+  # Name of file (a shell script) containing the defintions of variables
+  # associated with the external model from which ICs or LBCs are generated.  This
+  # file is created by the get_extrn_* task because the values of the variables
+  # it contains are not known before this task runs.  The file is then sourced by
+  # the make_ics and make_lbcs tasks.
+  #
+  # WFLOW_LAUNCH_SCRIPT_FN:
+  # Name of the script that can be used to (re)launch the experiment's rocoto
+  # workflow.
+  #
+  # WFLOW_LAUNCH_LOG_FN:
+  # Name of the log file that contains the output from successive calls to
+  # the workflow launch script (WFLOW_LAUNCH_SCRIPT_FN).
+  #
+  # GLOBAL_VAR_DEFNS_FP: 
+  # Path to the global variable definition file
+  # (GLOBAL_VAR_DEFNS_FN) in the experiment directory. 
+  #
+  # ROCOTO_YAML_FP: 
+  # Path to the Rocoto YAML configuration file 
+  # (ROCOTO_YAML_FN) in the experiment directory. 
+  #
+  # WFLOW_LAUNCH_SCRIPT_FP: 
+  # Path to the workflow launch script 
+  # (WFLOW_LAUNCH_SCRIPT_FN) in the experiment directory. 
+  #
+  # WFLOW_LAUNCH_LOG_FP: 
+  # Path to the log file (WFLOW_LAUNCH_LOG_FN) in 
+  # the experiment directory that contains output from successive 
+  # calls to the workflow launch script. 
+  # 
+  #-----------------------------------------------------------------------
+  #
+  WFLOW_XML_FN: "vx_wflow.xml"
+  GLOBAL_VAR_DEFNS_FN: "var_defns.yaml"
+  ROCOTO_YAML_FN: "rocoto_defns.yaml"
+  WFLOW_LAUNCH_SCRIPT_FN: "launch_vx_wflow.sh"
+  WFLOW_LAUNCH_LOG_FN: "log.launch_vx_wflow"
+
+  GLOBAL_VAR_DEFNS_FP: '{{ workflow.EXPTDIR }}/{{ workflow.GLOBAL_VAR_DEFNS_FN }}'
+  ROCOTO_YAML_FP: '{{ workflow.EXPTDIR }}/{{ workflow.ROCOTO_YAML_FN }}'
+  WFLOW_LAUNCH_SCRIPT_FP: '{{ user.USHdir }}/{{ workflow.WFLOW_LAUNCH_SCRIPT_FN }}'
+  WFLOW_LAUNCH_LOG_FP: '{{ workflow.EXPTDIR }}/{{ workflow.WFLOW_LAUNCH_LOG_FN }}'
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Set forecast parameters.  Definitions:
+  #
+  # DATE_FIRST_CYCL:
+  # Starting cycle date of the FIRST forecast in the set of forecasts to
+  # run.  Format is "YYYYMMDDHH".
+  #
+  # DATE_LAST_CYCL:
+  # Starting cycle date of the LAST forecast in the set of forecasts to run.
+  # Format is "YYYYMMDDHH".
+  #
+  # INCR_CYCL_FREQ:
+  # Increment in hours for Rocoto cycle frequency.
+  # Default is 24, which means cycle_freq=24:00:00
+  #
+  # FCST_LEN_HRS:
+  # The length of each forecast, in integer hours. The short forecast
+  # length when there are different lengths.
+  #
+  # LONG_FCST_LEN_HRS:
+  # The length of the longer forecast in integer hours in a system that
+  # varies the length of the forecast by time of day. There is no need for the user to update this value
+  # directly, as it is derived from FCST_LEN_CYCL when FCST_LEN_HRS=-1
+  #
+  # FCST_LEN_CYCL:
+  # The length of forecast for each cycle date in integer hours.
+  # This is valid only when FCST_LEN_HRS = -1.
+  # This pattern recurs for all cycle dates.
+  # Must have the same number of entries as cycles per day, or if less
+  # than one day the entries must include the length of each cycle to be
+  # run. By default, it is set to a 1-item list containing the standard
+  # fcst length.
+
+  #-----------------------------------------------------------------------
+  #
+  DATE_FIRST_CYCL: "YYYYMMDDHH"
+  DATE_LAST_CYCL: "YYYYMMDDHH"
+  INCR_CYCL_FREQ: 24
+  FCST_LEN_HRS: 24
+  FCST_LEN_CYCL:
+    - !int '{{ workflow.FCST_LEN_HRS }}'
+  LONG_FCST_LEN: !int '{{ workflow.FCST_LEN_CYCL|max if workflow.FCST_LEN_HRS < 0 else workflow.FCST_LEN_HRS }}'
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Set PREEXISTING_DIR_METHOD.  This variable determines how
+  # to deal with preexisting directories [e.g., ones generated by previous
+  # calls to the experiment generation script using the same experiment name
+  # (EXPT_SUBDIR) as the current experiment].  This variable must be set to
+  # "delete", "reuse", "rename", or "quit". The resulting behavior for each
+  # of these values is as follows:
+  #
+  # * "delete":
+  #   The preexisting directory is deleted and a new directory (having the
+  #   same name as the original preexisting directory) is created.
+  #
+  # * "rename":
+  #   The preexisting directory is renamed and a new directory (having the
+  #   same name as the original preexisting directory) is created. The new
+  #   name of the preexisting directory consists of its original name and
+  #   the suffix "_old_YYYYMMDD_HHmmss", where YYYYMMDD_HHmmss is the full
+  #   date and time of the rename
+  #
+  # * "reuse":
+  #    This method will keep preexisting directory intact except that
+  #     when preexisting directory is $EXPDIR, do the following:
+  #       save all old files to a subdirectory oldxxx/ and then
+  #       populate new files into the $EXPDIR directory
+  #    This is useful to keep ongoing runs uninterrupted:
+  #     rocotoco *db files and previous cycles will stay and hence
+  #       1. no need to manually cp/mv *db files and previous cycles back
+  #       2. no need to manually restart related rocoto tasks failed during
+  #            the workflow generation process
+  #    This may be best suited for incremental system reuses.
+  #
+  # * "quit":
+  #   The preexisting directory is left unchanged, but execution of the
+  #   currently running script is terminated.  In this case, the preexisting
+  #   directory must be dealt with manually before rerunning the script.
+  #
+  #-----------------------------------------------------------------------
+  #
+  PREEXISTING_DIR_METHOD: "quit"
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Set flags for more detailed messages.  Definitions:
+  #
+  # VERBOSE:
+  # This is a flag that determines whether or not the experiment generation 
+  # and workflow task scripts print out more informational messages.
+  #
+  # DEBUG:
+  # This is a flag that determines whether to print out very detailed debugging messages.
+  # Note that if DEBUG is set to True, then
+  # VERBOSE will also be reset to True if it isn't already.
+  #
+  #-----------------------------------------------------------------------
+  #
+  VERBOSE: true
+  DEBUG: false
+
+
+#----------------------------
+# global config parameters
+#-----------------------------
+global:
+  #
+  #-----------------------------------------------------------------------
+  #
+  # Set parameters associated with running ensembles.  Definitions:
+  #
+  # DO_ENSEMBLE:
+  # Flag that determines whether to run a set of ensemble forecasts (for
+  # each set of specified cycles).  If this is set to true, NUM_ENS_MEMBERS
+  # forecasts are run for each cycle, each with a different set of stochastic
+  # seed values.  When false, a single forecast is run for each cycle.
+  #
+  # NUM_ENS_MEMBERS:
+  # The number of ensemble members to run if DO_ENSEMBLE is set to true.
+  # This variable also controls the naming of the ensemble member directories.
+  # For example, if this is set to 8, the member directories will be named 
+  # mem1, mem2, ..., mem8. Not used if DO_ENSEMBLE is set to false.
+  #
+  # ENSMEM_NAMES:
+  # A list of names for the ensemble member names following the format
+  # mem001, mem002, etc.
+  #
+  # ENS_TIME_LAG_HRS:
+  # Time lag (in hours) to use for each ensemble member. For a deterministic
+  # forecast, this is a one-element array. Default values of array elements
+  # are zero.
+  #
+  #-----------------------------------------------------------------------
+  #
+  DO_ENSEMBLE: false
+  NUM_ENS_MEMBERS: 0
+  ENSMEM_NAMES: '{% for m in range(global.NUM_ENS_MEMBERS) %}{{ "mem%03d, " % m }}{% endfor %}'
+  ENS_TIME_LAG_HRS: '[ {% for m in range([1,global.NUM_ENS_MEMBERS]|max) %} 0, {% endfor %} ]'
+
+#
+#-----------------------------------------------------------------------
+#
+# Resources for tasks that run verification
+#
+#-----------------------------------------------------------------------
+#
+
+verification_resources:
+  execution:
+    nodes: 1
+    tasks_per_node: 1
+    deterministic:
+      gridstat:
+        tasks_per_node: '{{ verification.VX_TASKS }}'
+        walltime: 02:00:00
+        memory: '{{ 2 * verification.VX_TASKS }}G'
+      pointstat:
+        tasks_per_node: '{{ verification.VX_TASKS }}'
+        walltime: 01:00:00
+        memory: '{{ 2 * verification.VX_TASKS }}G'
+    ensemble:
+      genensprod:
+        default:
+          walltime: 04:45:00
+        ndas:
+          walltime: 02:30:00
+      ensemblestat:
+        walltime: 01:00:00
+      gridstat:
+        walltime: 01:00:00
+      pointstat:
+        walltime: 01:00:00
+    get_obs:
+      aeronet:
+        walltime: 02:00:00
+      airnow:
+        walltime: 00:45:00
+      ccpa:
+        walltime: 02:00:00
+      nohrsc:
+        walltime: 00:45:00
+      mrms:
+        walltime: 02:00:00
+      ndas:
+        walltime: 02:00:00
+    pb2nc:
+      walltime: 00:30:00
+    point2grid:
+      tasks_per_node: '{{ verification.VX_TASKS }}'
+      walltime: 01:00:00
+      memory: '{{ 2 * verification.VX_TASKS }}G'
+    ascii2nc:
+      walltime: 00:30:00
+    pcpcombine:
+      fcst:
+        walltime: 00:30:00
+      obs:
+        walltime: 00:10:00
+    check_post_output:
+      walltime: 00:30:00
+    regriddataplane:
+      tasks_per_node: '{{ mode.TASKS }}'
+      walltime: 00:30:00
+      memory: '{{ 10 * mode.TASKS }}G'
+    mode:
+      tasks_per_node: '{{ mode.TASKS }}'
+      walltime: 01:00:00
+      memory: '{{ 10 * mode.TASKS }}G'
+
+#----------------------------
+# Verification (VX) parameters
+#-----------------------------
+verification:
+  #
+  # General VX Parameters
+  # -------------------------------
+  #
+  # VX_FIELD_GROUPS:
+  # The groups of fields (some of which may consist of only a single field)
+  # on which to run verification.
+  #
+  # Since accumulated snowfall (ASNOW) is often not of interest in non-winter
+  # cases and because observation files for ASNOW are not available on NOAA
+  # HPSS for retrospective cases before March 2020, by default ASNOW is not
+  # included VX_FIELD_GROUPS, but it may be added to this list in order to
+  # include the verification tasks for ASNOW in the workflow. 
+  #
+  VX_FIELD_GROUPS: [ "APCP", "REFC", "RETOP", "SFC", "UPA" ]
+  #
+  # VX_APCP_ACCUMS_HRS:
+  # The accumulation intervals (in hours) to include in the verification of
+  # accumulated precipitation (APCP).  If VX_FIELD_GROUPS contains "APCP",
+  # then VX_APCP_ACCUMS_HRS must contain at least one element.  Otherwise,
+  # VX_APCP_ACCUMS_HRS will be ignored.
+  #
+  VX_APCP_ACCUMS_HRS: [ 1, 3, 6, 24 ]
+  #
+  # VX_ASNOW_ACCUMS_HRS:
+  # The accumulation intervals (in hours) to include in the verification of
+  # accumulated snowfall (ASNOW).  If VX_FIELD_GROUPS contains "ASNOW",
+  # then VX_ASNOW_ACCUMS_HRS must contain at least one element.  Otherwise,
+  # VX_ASNOW_ACCUMS_HRS will be ignored.
+  #
+  VX_ASNOW_ACCUMS_HRS: [ 6, 24 ]
+  #
+  # VX_CONFIG_[DET|ENS]_FN:
+  # Names of configuration files for deterministic and ensemble verification
+  # that specify the field groups, field names, levels, and (if applicable)
+  # thresholds for which to run verification.  These are relative to the
+  # directory METPLUS_CONF in which the METplus config templates are
+  # located.  They may include leading relative paths before the file
+  # names, e.g. "some_dir/another_dir/vx_config_det.yaml".
+  #
+  VX_CONFIG_DET_FN: 'vx_configs/vx_config_det.yaml'
+  VX_CONFIG_ENS_FN: 'vx_configs/vx_config_ens.yaml'
+  #
+  # VX_OUTPUT_BASEDIR:
+  # Template for base (i.e. top-level) directory in which METplus will place
+  # its output.
+  #
+  VX_OUTPUT_BASEDIR: '{{ workflow.EXPTDIR }}'
+  #
+  # METplus-Specific Parameters
+  # -------------------------------
+  #
+  # METPLUS_VERBOSITY_LEVEL: 
+  # Logging verbosity level used by METplus verification tools.  0 to 9,
+  # with 0 having the fewest log messages and 9 having the most. Levels 5
+  # and above can result in very large log files and slower tool execution.
+  # 
+  METPLUS_VERBOSITY_LEVEL: 2
+  #
+  # VX Parameters for Observations
+  # -------------------------------
+  #
+  # Note:
+  # The observation types that the verification workflow can currently retrieve (if
+  # necessary) and use in verification are:
+  #
+  #   * CCPA (Climatology-Calibrated Precipitation Analysis)
+  #   * NOHRSC (National Operational Hydrologic Remote Sensing Center)
+  #   * MRMS (Multi-Radar Multi-Sensor)
+  #   * NDAS (NAM Data Assimilation System)
+  #   * AERONET (Aerosol Robotic Network)
+  #   * AIRNOW (AirNow air quality reports)
+  #
+  # The script ush/get_obs.py contains further details on the files and
+  # directory structure of each obs type.
+  #
+
+  #
+  # *_OBS_AVAIL_INTVL_HRS:
+  # Time interval (in hours) at which various types of obs are available
+  #
+  # Note that MRMS, GOESAOD and GOESADP files are in fact available every few minutes, but here
+  # we set the obs availability interval to 1 hour because currently that
+  # is the shortest output interval for forecasts, i.e. the forecasts cannot
+  # (yet) support sub-hourly output.
+  #
+  CCPA_OBS_AVAIL_INTVL_HRS: 1
+  NOHRSC_OBS_AVAIL_INTVL_HRS: 6
+  MRMS_OBS_AVAIL_INTVL_HRS: 1
+  NDAS_OBS_AVAIL_INTVL_HRS: 1
+  AERONET_OBS_AVAIL_INTVL_HRS: 1
+  AIRNOW_OBS_AVAIL_INTVL_HRS: 1
+  GOESAOD_OBS_AVAIL_INTVL_HRS: 1
+  GOESADP_OBS_AVAIL_INTVL_HRS: 1
+  #
+  # *_OBS_DIR:
+  # Base directory in which observation files needed by verification tasks are
+  # located.  If the files do not exist, they will be retrieved and placed under
+  # this directory.
+  #
+  #
+  # Note that:
+  #
+  # * If the obs files need to be retrieved (e.g. from NOAA's HPSS), because
+  #   they are not already staged on disk, then the user must have write
+  #   permission to this directory.  Otherwise, the "get_obs" workflow tasks
+  #   that attempt to create these files will fail.
+  #
+  # * CCPA obs contain errors in the metadata for a certain range of dates
+  #   that need to be corrected during obs retrieval.  This is described
+  #   in more detail in the script ush/get_obs.py.
+  #
+  CCPA_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/ccpa"
+  NOHRSC_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/nohrsc"
+  MRMS_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/mrms"
+  NDAS_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/ndas"
+  AERONET_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/aeronet"
+  AIRNOW_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/airnow"
+  GOESAOD_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/goesaod"
+  GOESADP_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/goesadp"
+  #
+  # OBS_[CCPA|NOHRSC|MRMS|NDAS]_FN_TEMPLATES:
+  # File name templates for various obs types.  These are meant to be used
+  # in METplus configuration files and thus contain METplus time formatting
+  # strings.  Each of these variables is a python list containing pairs of
+  # values.  The first element of each pair specifies the verification field
+  # group(s) for which the file name template will be needed, and the second
+  # element is the file name template itself, which may include a leading
+  # relative directory.  (Here, by "verification field group", we mean a
+  # group of fields that is verified together in the workflow; see the
+  # description of the variable VX_FIELD_GROUPS.)  For example, for CCPA
+  # obs, the variable name is OBS_CCPA_FN_TEMPLATES.  From the default value
+  # of this variable given above, we see that if CCPA_OBS_AVAIL_INTVL_HRS
+  # is set to 1 (i.e. the CCPA obs are assumed to be available every hour)
+  # and the valid time is 2024042903, then the obs file (including a relative
+  # path) to look for and, if necessary, create is
+  #
+  #     20240429/ccpa.t03z.01h.hrap.conus.gb2
+  #
+  # This file will be used in the verification of fields under the APCP
+  # field group (which consist of accumulated precipitation for the
+  # accumulation intervals specified in VX_APCP_ACCUMS_HRS).
+  #
+  # Notes:
+  #
+  # * The file name templates are relative to the base directories given in
+  #   the variables
+  #
+  #       [CCPA|NOHRSC|MRMS|NDAS]_OBS_DIR
+  #
+  #   defined above.  Thus, the template for the full path to the obs files
+  #   is given, e.g. for CCPA obs, by
+  #
+  #       {CCPA_OBS_DIR}/{OBS_CCPA_FN_TEMPLATES[1]}
+  #
+  #   where the [1] indicates the second element of the list OBS_CCPA_FN_TEMPLATES.
+  #
+  # * The file name templates may represent file names only, or they may
+  #   include leading relative directories.
+  #
+  # * The default values of these variables for the CCPA, NOHRSC, and NDAS
+  #   obs types contain only one pair of values (because these obs types
+  #   contain only one set of files that we use in the verification) while
+  #   the default value for the MRMS obs type contains two pairs of values,
+  #   one for the set of files that contains composite reflectivity data
+  #   and another for the set that contains echo top data.  This is simply
+  #   because the MRMS obs type does not group these two fields together
+  #   one set of files as does, for example, the NDAS obs type.
+  #
+  # * Each file name template must contain full information about the year,
+  #   month, day, and hour by including METplus time formatting strings for
+  #   this information.  Some of this information (e.g. the year, month,
+  #   and day) may be in the relative directory portion of the template and
+  #   the rest (e.g. the hour) in the file name, or there may be no relative
+  #   directory portion and all of this information may be in the file name,
+  #   but all four pieces of timing information must be present somewhere in
+  #   each template as METplus time formatting strings.  If not, obs files
+  #   created by the "get_obs" tasks for different days might overwrite each
+  #   other.
+  #
+  # * The workflow generation scripts create a "get_obs" task for each obs
+  #   type that is needed in the verification and for each day on which that
+  #   obs type is needed at at least some hours.  That "get_obs" task first
+  #   checks whether all the necessary obs files for that day already exist
+  #   at the locations specified by the full path template(s) (which are
+  #   obtained by combining the base directories [CCPA|NOHRSC|MRMS|NDAS]_OBS_DIR
+  #   with the file name template(s)).  If for a given day one or more of
+  #   these obs files do not exist on disk, the "get_obs" task will retrieve
+  #   "raw" versions of these files from a data store (e.g. NOAA's HPSS)
+  #   and will place them in a temporary "raw" directory.  It will then
+  #   move or copy these raw files to the locations specified by the full
+  #   path template(s).
+  #
+  # * The raw obs files, i.e. the obs files as they are named and arranged
+  #   in the data stores and retrieved and placed in the raw directories,
+  #   may be arranged differently and/or have names that are different from
+  #   the ones specified in the file name templates.  If so, they are renamed
+  #   while being moved or copied from the raw directories to the locations
+  #   specified by the full path template(s).  (The lists of templates for
+  #   searching for and retrieving files from the data stores is different
+  #   than the METplus templates described here; the former are given in
+  #   the data retrieval configuration file at parm/data_locations.yml.)
+  #
+  # * When the ex-scripts for the various vx tasks are converted from bash
+  #   to python scripts, these variables should be converted from python
+  #   lists to python dictionaries, where the first element of each pair
+  #   becomes the key and the second becomes the value.  This currently
+  #   cannot be done due to limitations in the workflow on converting
+  #   python dictionaries to bash variables.
+  #
+  OBS_CCPA_FN_TEMPLATES: [ 'APCP',
+                           '{valid?fmt=%Y%m%d}/ccpa.t{valid?fmt=%H}z.{{ "%02d" % verification.CCPA_OBS_AVAIL_INTVL_HRS }}h.hrap.conus.gb2']
+  OBS_NOHRSC_FN_TEMPLATES: [ 'ASNOW',
+                             'sfav2_CONUS_{{ verification.NOHRSC_OBS_AVAIL_INTVL_HRS  }}h_{valid?fmt=%Y%m%d%H}_grid184.grb2' ]
+  OBS_MRMS_FN_TEMPLATES: [ 'REFC', '{valid?fmt=%Y%m%d}/MergedReflectivityQCComposite_00.50_{valid?fmt=%Y%m%d}-{valid?fmt=%H%M%S}.grib2',
+                           'RETOP', '{valid?fmt=%Y%m%d}/EchoTop_18_00.50_{valid?fmt=%Y%m%d}-{valid?fmt=%H%M%S}.grib2' ]
+  OBS_NDAS_FN_TEMPLATES: [ 'SFCandUPA', 'prepbufr.ndas.{valid?fmt=%Y%m%d%H}' ]
+  OBS_AERONET_FN_TEMPLATES: [ 'AOD', '{valid?fmt=%Y%m%d}/{valid?fmt=%Y%m%d}.lev15' ]
+  # NOTE: for files retrieved from AWS (see OBS_DATA_STORE variable), the
+  # default value for OBS_AIRNOW_FN_TEMPLATES should be replaced with
+  # '{valid?fmt=%Y%m%d}/HourlyData_{valid?fmt=%Y%m%d%H}.dat'
+  OBS_AIRNOW_FN_TEMPLATES: [ 'PM', '{valid?fmt=%Y%m%d}/HourlyAQObs_{valid?fmt=%Y%m%d%H}.dat' ]
+  OBS_GOESAOD_FN_TEMPLATES: [ 'GOESAOD', '{valid?fmt=%Y%m%d}/OR_ABI-L2-AODF_G16_{valid?fmt=%Y%m%d%H}.nc' ]
+  OBS_GOESADP_FN_TEMPLATES: [ 'GOESADP', '{valid?fmt=%Y%m%d}/OR_ABI-L2-ADPF_G16_{valid?fmt=%Y%m%d%H}.nc' ]
+  #
+  # REMOVE_RAW_OBS_DIRS
+  # Flag specifying whether to remove the "raw" observation directories
+  # after retrieving observations from a data store (e.g. NOAA's HPSS).
+  # The raw directories are the ones in which the observation files are placed
+  # after pulling them from the data store but before performing any
+  # processing on them such as renaming the files and/or reorganizing
+  # their directory structure.
+  #
+  REMOVE_RAW_OBS_DIRS: True
+  # 
+  # OBS_CCPA_APCP_FN_TEMPLATE_PCPCOMBINE_OUTPUT: 
+  # METplus template for the names of the NetCDF files generated by the
+  # workflow verification tasks that call METplus's PcpCombine tool on
+  # CCPA observations.  These files will contain observed accumulated
+  # precipitation in NetCDF format for various accumulation intervals.
+  #
+  OBS_CCPA_APCP_FN_TEMPLATE_PCPCOMBINE_OUTPUT: ccpa.hrap.conus.${FIELD_GROUP}${ACCUM_HH}h.{valid?fmt=%Y%m%d%H?shift=-${ACCUM_HH}H}_to_{valid?fmt=%Y%m%d%H}.nc
+  #
+  # OBS_NOHRSC_ASNOW_FN_TEMPLATE_PCPCOMBINE_OUTPUT: 
+  # METplus template for the names of the NetCDF files generated by the
+  # workflow verification tasks that call METplus's PcpCombine tool on
+  # NOHRSC observations.  These files will contain observed accumulated
+  # snowfall for various accumulaton intervals.
+  #
+  OBS_NOHRSC_ASNOW_FN_TEMPLATE_PCPCOMBINE_OUTPUT: sfav2_CONUS_{{ "%d" % NOHRSC_OBS_AVAIL_INTVL_HRS }}h_{valid?fmt=%Y%m%d%H}_grid184.grb2_a${ACCUM_HH}h.nc
+
+  # OBS_*_FN_TEMPLATE_ASCII2NC_OUTPUT:
+  # Template used to specify the names of the output NetCDF observation
+  # files generated by the workflow verification tasks that call the
+  # METplus ASCII2NC tool on AERONET and AIRNOW observations, respectively.
+  #
+  OBS_AERONET_FN_TEMPLATE_ASCII2NC_OUTPUT: 'hourly_aeronet_obs_{valid?fmt=%Y%m%d}00.nc'
+  OBS_AIRNOW_FN_TEMPLATE_ASCII2NC_OUTPUT: 'hourly_airnow_obs_{valid?fmt=%Y%m%d%H}.nc'
+  # OBS_GOES_AOD_FN_TEMPLATE_POINT2GRID_OUTPUT:
+  # Template used to specify the names of the gridded output from Point2Grid
+  # for GOES AOD observations
+  #
+  OBS_GOES_AOD_FN_TEMPLATE_POINT2GRID_OUTPUT: 'goes_aod_obs_{valid?fmt=%Y%m%d%H}.nc'
+  #
+  # AIRNOW_INPUT_FORMAT:
+  # Observation format for ASCII Airnow observations. Observations retrieved from HPSS are in
+  # "airnowhourlyaqobs" format, observations retrieved from AWS are generally in "airnowhourly" format.
+  # For more information see the METplus users guide: 
+  # https://met.readthedocs.io/en/latest/Users_Guide/reformat_point.html#ascii2nc-tool
+
+  AIRNOW_INPUT_FORMAT: "airnowhourlyaqobs"
+
+  # FCST_SMOKE_TYPE:
+  # Different forecast data have different particulate matter variables that must be verified differently.
+  # Options are:
+  # HRRR: HRRR output contains only PM 2.5 in a variable named MASSDEN.
+  # RRFS: RRFS output contains three MASSDEN variables, one of which is PM 10 and the other two combined
+  #       are summed in PCP Combine task to get total PM 2.5 
+
+  FCST_SMOKE_TYPE: RRFS
+  #
+  # OBS_DATA_STORE*:
+  # Location(s) to retrieve observation data from. Valid values are "aws" and/or "hpss", see
+  # parm/data_locations.yaml for info on these data stores.
+  # 
+  OBS_DATA_STORE_CCPA: hpss
+  OBS_DATA_STORE_NOHRSC: hpss
+  OBS_DATA_STORE_MRMS: hpss
+  OBS_DATA_STORE_NDAS: hpss
+  OBS_DATA_STORE_AERONET: hpss
+  OBS_DATA_STORE_AIRNOW: hpss
+  OBS_DATA_STORE_GOESAOD: aws
+  OBS_DATA_STORE_GOESADP: aws
+  #
+  # OBS_NDAS_SFCandUPA_FN_TEMPLATE_PB2NC_OUTPUT: 
+  # METplus template for the names of the NetCDF files generated by the
+  # workflow verification tasks that call METplus's Pb2nc tool on the 
+  # prepbufr files in NDAS observations.  These files will contain the
+  # observed surface (SFC) and upper-air (UPA) fields in NetCDF format
+  # (instead of NDAS's native prepbufr format).
+  #
+  OBS_NDAS_SFCandUPA_FN_TEMPLATE_PB2NC_OUTPUT: '{{ verification.OBS_NDAS_FN_TEMPLATES[1] }}.nc'
+  #
+  # NUM_MISSING_OBS_FILES_MAX:
+  # For verification tasks that need observational data, this specifies
+  # the maximum number of observation files that may be missing.  If more
+  # than this number are missing, the verification task will error out.
+  # This is a crude way of checking that there are enough obs to conduct
+  # verification (crude because this number should probably depend on the
+  # field being verified, the time interval between observations, the
+  # length of the forecast, etc; an alternative may be to specify the
+  # maximum allowed fraction of obs files that can be missing).
+  #
+  NUM_MISSING_OBS_FILES_MAX: 0
+  #
+  # VX Parameters for Forecasts
+  # ----------------------------
+  #
+  # VX_FCST_MODEL_NAME:
+  # String that specifies a descriptive name for the model being verified.
+  # This is used in forming the names of the verification output files and
+  # is also included in the contents of those files.
+  #
+  VX_FCST_MODEL_NAME: 'srw'
+  #
+  # VX_FCST_OUTPUT_INTVL_HRS:
+  # The forecast output interval (in hours) to assume for verification
+  # purposes.
+  #
+  VX_FCST_OUTPUT_INTVL_HRS: 1
+  #
+  # VX_FCST_INPUT_BASEDIR:
+  # METplus template for the name of the base (i.e. top-level) directory
+  # containing the forecast files to use as inputs to the verification
+  # tasks.
+  #
+  VX_FCST_INPUT_BASEDIR: '{{ workflow.EXPTDIR }}'
+  #
+  # FCST_SUBDIR_TEMPLATE:
+  # METplus template for the name of the subdirectory containing forecast
+  # files to use as inputs to the verification tasks.
+  #
+  FCST_SUBDIR_TEMPLATE: '{init?fmt=%Y%m%d%H?shift=-${time_lag}}{{ "/${ensmem_name}" if global.DO_ENSEMBLE }}/postprd'
+  #
+  # FCST_FN_TEMPLATE:
+  # METplus template for the names of the forecast files to use as inputs
+  # to the verification tasks.
+  # 
+  FCST_FN_TEMPLATE: 'srw.t{init?fmt=%H?shift=-${time_lag}}z.prslev.f{lead?fmt=%HHH?shift=${time_lag}}.{{ verification.VX_FCST_MODEL_NAME }}.grib2'
+  #
+  # FCST_FN_TEMPLATE_PCPCOMBINE_OUTPUT:
+  # METplus template for the names of the NetCDF files generated by the
+  # workflow verification tasks that call METplus's PcpCombine tool on
+  # forecast output.  These files will contain forecast accumulated
+  # precipitation in NetCDF format for various accumulation intervals.
+  #
+  FCST_FN_TEMPLATE_PCPCOMBINE_OUTPUT: 'srw.t{init?fmt=%H}z.prslev.{{ verification.VX_FCST_MODEL_NAME }}.${FIELD_GROUP}${ACCUM_HH}h.{valid?fmt=%Y%m%d%H?shift=-${ACCUM_HH}H}_to_{valid?fmt=%Y%m%d%H}.nc'
+  #
+  # VX_NDIGITS_ENSMEM_NAMES:
+  # Number of digits to assume/use in the forecast ensemble member identifier
+  # string used in directory and file names and other instances in which the
+  # ensemble member needs to be identified.  For example, if this is set to
+  # 3, the identifier for ensemble member 4 will be "mem004", while if it's
+  # set to 2, the identifier will be "mem04".
+  #
+  VX_NDIGITS_ENSMEM_NAMES: 3
+  #
+  # NUM_MISSING_FCST_FILES_MAX:
+  # For verification tasks that need forecast data, this specifies the
+  # maximum number of post-processed forecast files that may be missing. 
+  # If more than this number are missing, the verification task will exit
+  # with an error.
+  #
+  NUM_MISSING_FCST_FILES_MAX: 0
+
+  # Name(s) of the sub-grid(s) of the forecast domain to verify on. Valid grids are found in the MET users
+  # guide (https://metplus.readthedocs.io/projects/met/en/latest/Users_Guide/appendixB.html#grids)
+  # or under parm/metplus/GRIDNAME.poly
+  VX_MASK: []
+
+  # Number of verification tasks to run in parallel; this works for METplus tools that work on
+  # sequential forecast hours, and so can be run simultaneously.
+  VX_TASKS: 1
+
+point2grid:
+  REGRID_METHOD: BILIN
+  # Comma-separated string indicating which DQF (quality control) flags to keep for GOES observations. Described in GOES_ABI_products_PUG-L2+-vol5.pdf
+  # 0: high quality
+  # 1: medium quality
+  # 2: low quality
+  # 3: no retrieval quality flag
+  GOES_QC_FLAGS: '0,1'
+
+regriddataplane:
+  TASKS: 1
+  REGRID_METHOD: MAXGAUSS
+  GAUSSIAN_DX: 81.271
+  GAUSSIAN_RADIUS: 120
+
+mode:
+  # Number of MODE instances to run in parallel
+  TASKS: 1
+
+  # For more information on MODE variables see the MODE documentation:
+  # https://metplus.readthedocs.io/projects/met/en/latest/Users_Guide/mode.html
+  #
+  # CONV_RADIUS:
+  # The radius of a circular convolution applied to the raw fields for defining MODE objects
+  #
+  # CONV_THRESH:
+  # The value threshold defining what consitutes an object. Multiple values may be specified for
+  # multiple output convolutions. The threshold used should depend on the observation type; for
+  # example, 20, 30, or 40 are typically used for radar reflectivity.
+  #
+  # MERGE_THRESH:
+  # The threshold value(s) to be applied to the convolved field to define objects. Larger values
+  # will result in larger/more-merged objects. Should be the same length as CONV_THRESH. No effect
+  # unless MERGE_FLAG=THRESH or BOTH
+  #
+  # MERGE_FLAG:
+  # The merging techinque to use for MODE objects. Valid values are NONE, THRESH, ENGINE, or BOTH
+
+  CONV_RADIUS: [5]
+  CONV_THRESH: ['>=0']
+  MERGE_THRESH: ['>=5']
+  MERGE_FLAG: NONE
+
+  # GRID_RES:
+  # Nominal grid resolution in kilometers
+  GRID_RES: 0
+
+  # TOTAL_INTEREST_THRESH:
+  # A value between 0 and 1 that controls how MODE objects are matched. Higher values will increase
+  # the strictness of the comparison (decreasing the number of matches), and vice versa
+  TOTAL_INTEREST_THRESH: 0.7
+
+  # OUTPUT_TEMPLATE:
+  # Template for MODE output filenames
+  OUTPUT_TEMPLATE: 'MODE_GOESAOD_{init?fmt=%Y%m%d%H}'
