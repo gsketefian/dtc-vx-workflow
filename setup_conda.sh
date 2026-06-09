@@ -16,21 +16,47 @@ if [ ! -d "${CONDA_BUILD_DIR}" ] ; then
   rm -f ${installer}
 fi
 
+echo
+echo "HELLO 0000"
+
 . ${CONDA_BUILD_DIR}/etc/profile.d/conda.sh
 # Put some additional packages in the base environment on MacOS systems
 if [ "${os}" == "MacOSX" ] ; then
   mamba install -y bash coreutils sed
 fi
+
+echo
+echo "HELLO 1111"
+
 conda activate
+echo
+echo "HELLO 2222"
 if ! conda env list | grep -q "^vx_workflow\s" ; then
   mamba env create -n vx_workflow --file "${VX_WFLOW_DIR}/environment.yml" -y
 fi
 
+echo
+echo "HELLO 3333"
 if [[ ! "$PATH" =~ "$CONDA_BUILD_DIR" ]]; then
   export PATH=${CONDA_BUILD_DIR}/condabin:${CONDA_BUILD_DIR}/bin:${PATH}
 fi
+echo
+echo "HELLO 4444"
+# If LD_LIBRARY_PATH is undefined, set it to an empty string so it doesn't
+# cause a crash if the nonset shell option is enabled.
+${LD_LIBRARY_PATH:=}
 if [[ ! "$LD_LIBRARY_PATH" =~ "$CONDA_BUILD_DIR" ]]; then
   export LD_LIBRARY_PATH=${CONDA_BUILD_DIR}/lib:${LD_LIBRARY_PATH}
 fi
 
+echo
+echo "HELLO 5555"
+output=$(which module)
+echo "ouptut = |$output|"
+
 conda activate vx_workflow
+
+echo
+echo "HELLO 6666"
+output=$(which module)
+echo "ouptut = |$output|"

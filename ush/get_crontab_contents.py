@@ -75,11 +75,16 @@ def add_crontab_line(called_from_cron, machine, crontab_line, exptdir, debug) ->
     #
     time_stamp = datetime.now().strftime("%F_%T")
     crontab_backup_fp = os.path.join(exptdir, f"crontab.bak.{time_stamp}")
+#    logger.info(
+#        f"""
+#        Copying contents of user cron table to backup file:
+#          crontab_backup_fp = '{crontab_backup_fp}'""",
+#        verbose=debug,
+#    )
     logger.info(
         f"""
         Copying contents of user cron table to backup file:
-          crontab_backup_fp = '{crontab_backup_fp}'""",
-        verbose=debug,
+          crontab_backup_fp = '{crontab_backup_fp}'"""
     )
 
     # Get crontab contents
@@ -114,12 +119,18 @@ def add_crontab_line(called_from_cron, machine, crontab_line, exptdir, debug) ->
               crontab_line = '{crontab_line}'"""
         )
     else:
+#        logger.info(
+#            f"""
+#            Adding the following line to the user's cron table in order to automatically
+#            resubmit workflow:
+#              crontab_line = '{crontab_line}'""",
+#            verbose=debug,
+#        )
         logger.info(
             f"""
             Adding the following line to the user's cron table in order to automatically
             resubmit workflow:
-              crontab_line = '{crontab_line}'""",
-            verbose=debug,
+              crontab_line = '{crontab_line}'"""
         )
 
         # add new line to crontab contents if it doesn't have one
@@ -145,10 +156,13 @@ def delete_crontab_line(called_from_cron, machine, crontab_line, debug) -> None:
         debug             (bool): ``True`` will give more verbose output
     """
 
+    logger = logging.getLogger(__name__)
+
     #
     # Get the full contents of the user's cron table.
     #
     (crontab_cmd, crontab_contents) = get_crontab_contents(called_from_cron, machine, debug)
+
     #
     # Remove the line in the contents of the cron table corresponding to the
     # current forecast experiment (if that line is part of the contents).
