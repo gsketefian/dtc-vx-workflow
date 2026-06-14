@@ -1,0 +1,35 @@
+metadata:
+  description: |-
+    This is a basic test for deterministic verification with staged observations and
+    specified verification masks.
+workflow:
+  DATE_FIRST_CYCL: '2026022800'
+  DATE_LAST_CYCL: '2026022800'
+  FCST_LEN_HRS: 6
+  PREEXISTING_DIR_METHOD: rename
+  taskgroups:
+  - parm/wflow/verify_pre.yaml
+  - parm/wflow/verify_det.yaml
+  EXPT_SUBDIR: MET_verification_only_vx_try_RRFS
+  USE_CRON_TO_RELAUNCH: false
+verification:
+  VX_MASK:
+  - CONUS
+#  - EAST
+#  - EAST_OF_ROCKIES
+  VX_FCST_MODEL_NAME: srw.RRFS_CONUS_25km
+#  VX_FCST_INPUT_BASEDIR: /scratch4/BMC/fv3lam/Gerard.Ketefian/metplus_framework/data/MPAS_RRFSA
+#  VX_FCST_INPUT_BASEDIR: /work2/noaa/noaa-det/data/MPAS_RRFSA
+  VX_FCST_INPUT_BASEDIR: /work/noaa/wrfruc/gketefia/DTC_RRFS/model_output/MPAS_RRFSA
+#  FCST_FN_TEMPLATE: 'mpas_rrfsa_{init?fmt=%Y%m%d%H?shift=-${time_lag}}_f{lead?fmt=%H?shift=${time_lag}}.grib2'
+  FCST_FN_TEMPLATE: '{init?fmt=%Y%m%d%H?shift=-${time_lag}}.grib2'
+#  FCST_SUBDIR_TEMPLATE: '{init?fmt=%Y%m%d?shift=-${time_lag}}/{init?fmt=%Y%m%d%H?shift=-${time_lag}}'
+  FCST_SUBDIR_TEMPLATE: '{init?fmt=%Y%m%d?shift=-${time_lag}}'
+#
+  VX_FIELD_GROUPS: [ "APCP", "ASNOW", "REFC", "RETOP", "SFC", "UPA" ]
+user:
+  #MACHINE: HERA
+  MACHINE: ORION
+  #ACCOUNT: fv3lam
+  ACCOUNT: wrfruc
+
