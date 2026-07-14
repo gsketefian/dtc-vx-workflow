@@ -489,20 +489,32 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
     #
     # -----------------------------------------------------------------------
     #
-    # Remove all verification (meta)tasks which are not needed for the specified
-    # list of verification field groups.
+    # Remove all workflow (meta)tasks which are not needed for the specified
+    # list of verification field groups (VX_FIELD_GROUPS) and/or because
+    # GET_OBS_ONLY is set to True.
+    #
+    # Due to the introduction of the GET_OBS_ONLY flag, it is necessary to
+    # split the complete list of (meta)tasks for each obs type to those 
+    # that retrieve that obs type (getobs_metatasks_...) and all others
+    # (vx_metatasks_...).
+    #
     # Note that if the metatask specification depends on the field group, it
     # does not need to be listed here because those metatasks will be removed
-    # later by clean_rocoto_dict()
+    # later by clean_rocoto_dict().  [clean_rocoto_dict() is also run above
+    # to clean up invalid tasks in expt_config["rocoto"]["tasks"].]
     #
     # -----------------------------------------------------------------------
     #
-    vx_field_groups_all_by_obtype = {}
-    vx_metatasks_all_by_obtype = {}
+    field_groups_by_obtype = {}
+    getobs_metatasks_by_obtype = {}
+    vx_metatasks_by_obtype = {}
 
-    vx_field_groups_all_by_obtype["CCPA"] = ["APCP"]
-    vx_metatasks_all_by_obtype["CCPA"] = [
+    obtype = "CCPA"
+    field_groups_by_obtype[obtype] = ["APCP"]
+    getobs_metatasks_by_obtype[obtype] = [
         "task_get_obs_ccpa",
+    ]
+    vx_metatasks_by_obtype[obtype] = [
         "metatask_PcpCombine_APCP_all_accums_obs_CCPA",
         "metatask_PcpCombine_APCP_all_accums_all_mems",
         "metatask_GridStat_APCP_all_accums_all_mems",
@@ -510,9 +522,12 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "metatask_GridStat_APCP_all_accums_ensmeanprob",
     ]
 
-    vx_field_groups_all_by_obtype["NOHRSC"] = ["ASNOW"]
-    vx_metatasks_all_by_obtype["NOHRSC"] = [
+    obtype = "NOHRSC"
+    field_groups_by_obtype[obtype] = ["ASNOW"]
+    getobs_metatasks_by_obtype[obtype] = [
         "task_get_obs_nohrsc",
+    ]
+    vx_metatasks_by_obtype[obtype] = [
         "metatask_PcpCombine_ASNOW_all_accums_obs_NOHRSC",
         "metatask_PcpCombine_ASNOW_all_accums_all_mems",
         "metatask_GridStat_ASNOW_all_accums_all_mems",
@@ -520,57 +535,222 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "metatask_GridStat_ASNOW_all_accums_ensmeanprob",
     ]
 
-    vx_field_groups_all_by_obtype["MRMS"] = ["REFC", "RETOP"]
-    vx_metatasks_all_by_obtype["MRMS"] \
-    = ["task_get_obs_mrms",
-       "metatask_GridStat_REFC_RETOP_all_mems"]
+    obtype = "MRMS"
+    field_groups_by_obtype[obtype] = ["REFC", "RETOP"]
+    getobs_metatasks_by_obtype[obtype] = [
+        "task_get_obs_mrms",
+    ]
+    vx_metatasks_by_obtype[obtype] = [
+        "metatask_GridStat_REFC_RETOP_all_mems",
+    ]
 
-    vx_field_groups_all_by_obtype["NDAS"] = ["SFC", "UPA"]
-    vx_metatasks_all_by_obtype["NDAS"] \
-    = ["task_get_obs_ndas",
-       "task_run_MET_Pb2nc_obs_NDAS",
-       "metatask_PointStat_SFC_UPA_ensmeanprob"]
+    obtype = "NDAS"
+    field_groups_by_obtype[obtype] = ["SFC", "UPA"]
+    getobs_metatasks_by_obtype[obtype] = [
+        "task_get_obs_ndas",
+    ]
+    vx_metatasks_by_obtype[obtype] = [
+        "task_run_MET_Pb2nc_obs_NDAS",
+        "metatask_PointStat_SFC_UPA_all_mems",
+        "metatask_PointStat_SFC_UPA_ensmeanprob",
+    ]
 
-    vx_field_groups_all_by_obtype["AERONET"] = ["AOD"]
-    vx_metatasks_all_by_obtype["AERONET"] \
-    = ["task_get_obs_aeronet"]
+    obtype = "AERONET"
+    field_groups_by_obtype[obtype] = ["AOD"]
+    getobs_metatasks_by_obtype[obtype] = [
+        "task_get_obs_aeronet",
+    ]
+    vx_metatasks_by_obtype[obtype] = [
+        "metatask_PointStat_AOD_all_mems",
+    ]
 
-    vx_field_groups_all_by_obtype["AIRNOW"] = ["PM25", "PM10"]
-    vx_metatasks_all_by_obtype["AIRNOW"] \
-    = ["task_get_obs_airnow"]
+    obtype = "AIRNOW"
+    field_groups_by_obtype[obtype] = ["PM25", "PM10"]
+    getobs_metatasks_by_obtype[obtype] = [
+        "task_get_obs_airnow",
+    ]
+    vx_metatasks_by_obtype[obtype] = [
+        "metatask_PointStat_PM25_PM10_all_mems",
+    ]
 
-    vx_field_groups_all_by_obtype["GOESAOD"] = ["GOESAOD"]
-    vx_metatasks_all_by_obtype["GOESAOD"] \
-    = ["task_get_obs_goes_aod","task_run_MET_Point2Grid_GOESAOD"]
+    obtype = "GOESAOD"
+    field_groups_by_obtype[obtype] = ["GOESAOD"]
+    getobs_metatasks_by_obtype[obtype] = [
+        "task_get_obs_goes_aod",
+    ]
+    vx_metatasks_by_obtype["GOESAOD"] = [
+        "task_run_MET_Point2Grid_GOESAOD",
+    ]
 
-    vx_field_groups_all_by_obtype["GOESADP"] = ["GOESADP"]
-    vx_metatasks_all_by_obtype["GOESADP"] \
-    = ["task_get_obs_goes_adp","task_run_MET_Point2Grid_GOESAOD"]
+    obtype = "GOESADP"
+    field_groups_by_obtype[obtype] = ["GOESADP"]
+    getobs_metatasks_by_obtype[obtype] = [
+        "task_get_obs_goes_adp",
+    ]
+    vx_metatasks_by_obtype[obtype] = [
+        "task_run_MET_Point2Grid_GOESADP",
+    ]
+
+    obtypes_all = field_groups_by_obtype.keys()
+    all_metatasks_by_obtype = {}
+    for obtype in obtypes_all:
+        all_metatasks_by_obtype[obtype] \
+          = getobs_metatasks_by_obtype[obtype] + vx_metatasks_by_obtype[obtype]
+
+    rocoto_tasks = list(rocoto_config["tasks"])
+    msg = dedent(
+        f"""
+        The list of rocoto (meta)tasks BEFORE removing unnecessary ones is:"""
+    )
+    logging.info(msg)
+    for metatask in rocoto_tasks:
+        msg = f'    ' + metatask
+        logging.info(msg)
+
+    # Get flag that specifies whether to keep only the get_obs_... tasks in
+    # the workflow.
+    get_obs_only = vx_config["GET_OBS_ONLY"]
 
     # If there are no field groups specified for verification, remove those
     # tasks that are common to all observation types.
-    vx_field_groups = vx_config["VX_FIELD_GROUPS"]
-    if not vx_field_groups:
+    field_groups_to_process = vx_config["VX_FIELD_GROUPS"]
+    if not field_groups_to_process or get_obs_only:
         metatask = "metatask_check_post_output_all_mems"
+        if not field_groups_to_process:
+            logging.info(
+                dedent(
+                    f"""
+                Removing verification (meta)task
+                    "{metatask}"
+                from workflow because VX_FIELD_GROUPS is empty (and thus there are no field
+                groups to verify that need this (meta)task)."""
+                )
+            )
+        elif get_obs_only:
+            logging.info(
+                dedent(
+                    f"""
+                Removing verification (meta)task
+                    "{metatask}"
+                from workflow because GET_OBS_ONLY is set to True.""" 
+                )
+            )
         rocoto_config["tasks"].pop(metatask)
 
     # If for a given obs type none of its field groups are specified for
-    # verification, remove all vx metatasks for that obs type.
-    for obtype, vx_tasks in vx_field_groups_all_by_obtype.items():
-        vx_field_groups_crnt_obtype = list(set(vx_field_groups) & set(vx_tasks))
-        if not vx_field_groups_crnt_obtype:
-            for metatask in vx_metatasks_all_by_obtype[obtype]:
-                if metatask in rocoto_config["tasks"]:
+    # verification in the workflow config file, remove all vx metatasks for
+    # that obs type from the workflow.
+    all_metatasks_to_run_by_obtype = {}
+    for obtype, field_groups_crnt_obtype in field_groups_by_obtype.items():
+        # From the list of field groups for the current obs type, select only those
+        # that are also specified in the workflow config file (i.e. specified by
+        # the user in VX_FIELD_GROUPS) because the remainder are not requested.
+        field_groups_to_process_crnt_obtype \
+          = list(set(field_groups_to_process) & set(field_groups_crnt_obtype))
+        # For the current obs type, get the complete list of get_obs metatasks,
+        # vx metatasks, and combined (both get_obs and vx) metatasks.
+        getobs_metatasks_crnt_obtype = getobs_metatasks_by_obtype[obtype]
+        vx_metatasks_crnt_obtype = vx_metatasks_by_obtype[obtype]
+        all_metatasks_crnt_obtype = all_metatasks_by_obtype[obtype]
+        # If there are field groups to process for the current obs type, then set
+        # the list of get_obs metatasks to run to the complete list of get_obs
+        # metatasks for the type.  Then set the list of vx metatasks to run to
+        # either an empty list (if get_obs_only is True, meaning only get_obs
+        # tasks will be run) or to the complete list of vx metatasks for the
+        # obs type (if get_obs_only is False).
+        if field_groups_to_process_crnt_obtype:
+            getobs_metatasks_to_run_crnt_obtype = getobs_metatasks_crnt_obtype
+            if get_obs_only:
+                if vx_metatasks_crnt_obtype:
                     logging.info(
                         dedent(
                             f"""
-                        Removing verification (meta)task
-                          "{metatask}"
-                        from workflow since no field groups from observation type "{obtype}" are
-                        specified for verification."""
+                        Will remove all verification (meta)tasks for observation type "{obtype}"
+                        from the workflow (but will keep all obs tasks, e.g. get_obs_...) because
+                        GET_OBS_ONLY has been set to True.  The verification tasks to be removed
+                        are:
+                            {vx_metatasks_crnt_obtype}"""
                         )
                     )
-                    rocoto_config["tasks"].pop(metatask)
+                vx_metatasks_to_run_crnt_obtype = []
+            else:
+                vx_metatasks_to_run_crnt_obtype = vx_metatasks_crnt_obtype
+        # If there are no field groups to process for the current obs type, then
+        # set the lists of get_obs and vx metatasks to run for the obs type to
+        # empty lists.
+        else:
+            # Print out an informational message only if there actually are get_obs
+            # or vx metatasks for the current obs type to exclude.
+            if getobs_metatasks_crnt_obtype or vx_metatasks_crnt_obtype:
+                logging.info(
+                    dedent(
+                        f"""
+                    Will remove all observaton AND verification (meta)tasks for observation
+                    type "{obtype}" from the workflow because none of the field groups for 
+                    this observation type are in the list of field groups to be processed
+                    (VX_FIELD_GROUPS).  The observation tasks to be removed are:
+                        {getobs_metatasks_crnt_obtype}
+                    The verification tasks to be removed are:
+                        {vx_metatasks_crnt_obtype}"""
+                    )
+                )
+            getobs_metatasks_to_run_crnt_obtype = []
+            vx_metatasks_to_run_crnt_obtype = []
+
+        all_metatasks_to_run_crnt_obtype \
+          = getobs_metatasks_to_run_crnt_obtype + vx_metatasks_to_run_crnt_obtype
+
+        all_metatasks_to_run_by_obtype[obtype] = all_metatasks_to_run_crnt_obtype
+
+    # Collect all metatasks to be run (i.e. from each obs type) into a single list.
+    all_metatasks_to_run = [
+        mt for obtype in obtypes_all for mt in all_metatasks_to_run_by_obtype[obtype]
+    ]
+    # Remove all (meta)tasks in rocoto_config that are not also in all_metatasks_to_run.
+    rocoto_tasks = list(rocoto_config["tasks"])
+    for metatask in rocoto_tasks:
+        if metatask not in all_metatasks_to_run:
+            logging.debug(
+                dedent(
+                    f"""
+                Removing verification (meta)task
+                    "{metatask}"
+                from workflow since either no field groups in VX_FIELD_GROUPS need this
+                (meta)task for verification or because GET_OBS_ONLY is set to True (or
+                both)."""
+                )
+            )
+            rocoto_config["tasks"].pop(metatask)
+
+    # Get remaining tasks in rocoto_config.
+    rocoto_tasks = list(rocoto_config["tasks"])
+    # Reorder all_metatasks_to_run so that elements of rocoto_tasks come first.
+    all_metatasks_to_run.sort(key=lambda x: rocoto_tasks.index(x) if x in rocoto_tasks else len(rocoto_tasks))
+    # Check whether there are tasks in all_metatasks_to_run that are not in 
+    # rocoto_config["tasks"].  If so, log an error and raise an error.
+    missing_metatasks = [mt for mt in all_metatasks_to_run if mt not in rocoto_tasks]
+    if missing_metatasks:
+        msg = dedent(
+            f"""
+            Some metatasks in all_metatasks_to_run do not appear in the list of tasks
+            in rocoto_config:
+                {all_metatasks_to_run         = }
+                {list(rocoto_config["tasks"]) = }
+                {missing_metatasks            = }
+            """
+        )
+        logging.error(msg)
+        raise ValueError(msg)
+
+    msg = dedent(
+        f"""
+        The list of rocoto (meta)tasks AFTER removing unnecessary ones is:"""
+    )
+    logging.info(msg)
+    for metatask in rocoto_tasks:
+        msg = f'    ' + metatask
+        logging.info(msg)
+    lasdkjf
     #
     # -----------------------------------------------------------------------
     #
@@ -580,8 +760,7 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
     #
     # -----------------------------------------------------------------------
     #
-    if vx_field_groups:
-        obtypes_all = ["CCPA", "NOHRSC", "MRMS", "NDAS", "AERONET", "AIRNOW", "GOESAOD"]
+    if field_groups_to_process:
         obs_basedir_var_names = [f"{obtype}_OBS_DIR" for obtype in obtypes_all]
         obs_basedirs_dict = {key: vx_config[key] for key in obs_basedir_var_names}
         obs_basedirs_orig = list(obs_basedirs_dict.values())

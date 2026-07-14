@@ -704,6 +704,13 @@ verification:
   #
 
   #
+  # GET_OBS_ONLY:
+  # Flag that causes only obs-related tasks (e.g. get_obs_...) to be run
+  # in the workflow.  All tasks that run METplus tools are removed from
+  # the workflow.  This is useful if the user only wants to pull obs data.
+  #
+  GET_OBS_ONLY: False
+  #
   # *_OBS_AVAIL_INTVL_HRS:
   # Time interval (in hours) at which various types of obs are available
   #
