@@ -780,7 +780,8 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
 
     # Get remaining tasks in rocoto_config.
     rocoto_tasks = list(rocoto_config["tasks"])
-    # Reorder all_metatasks_to_run so that elements of rocoto_tasks come first.
+    # Reorder elements in all_metatasks_to_run so that the elements of
+    # rocoto_tasks that are in all_metatasks_to_run come first.
     all_metatasks_to_run.sort(key=lambda x: rocoto_tasks.index(x) if x in rocoto_tasks else len(rocoto_tasks))
     # Check whether there are tasks in all_metatasks_to_run that are not in 
     # rocoto_config["tasks"].  If so, log an error and raise an error.
