@@ -1,0 +1,32 @@
+metadata:
+  description: |-
+    Sample pull of winter retros for DTC's MPAS Stoch Physics project.
+
+user:
+  MACHINE: HERA
+  ACCOUNT: fv3lam
+
+workflow:
+  EXPT_SUBDIR: tina_mpas_stoch_winter_pull_obs
+  PREEXISTING_DIR_METHOD: rename
+#  DATE_FIRST_CYCL: '2026022800'
+#  DATE_LAST_CYCL: '2026022800'
+#  DATE_FIRST_CYCL: '2023010800'
+#  DATE_LAST_CYCL: '2023010900'
+#  DATE_FIRST_CYCL: '2023011200'
+#  DATE_LAST_CYCL: '2023011300'
+  DATE_FIRST_CYCL: '2023010500'
+  DATE_LAST_CYCL: '2023011300'
+  INCR_CYCL_FREQ: 24
+  FCST_LEN_HRS: 48
+  taskgroups:
+  - parm/wflow/verify_pre.yaml
+#  - parm/wflow/verify_det.yaml
+#  - parm/wflow/verify_ens.yaml
+  USE_CRON_TO_RELAUNCH: true
+  CRON_RELAUNCH_INTVL_MNTS: 1
+
+verification:
+  OBS_ONLY: True
+  VX_FIELD_GROUPS: [ "APCP", "ASNOW", "REFC", "RETOP", "SFC", "UPA" ]
+
