@@ -489,21 +489,21 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
     #
     # -----------------------------------------------------------------------
     #
-    # Remove all workflow (meta)tasks which are not needed for the specified
-    # list of verification field groups (VX_FIELD_GROUPS) and/or because
-    # GET_OBS_ONLY is set to True.
+    # Depending on the settings of various flags in the dtc-vx-workflow config
+    # file (e.g. OBS_ONLY, VX_FIELD_GROUPS, DO_ENSEMBLE, etc), some (meta)tasks
+    # may have to be removed from the workflow.  To make it easier to determine
+    # which (meta)tasks need to be removed (and which kept), we group the (meta)
+    # tasks for each obs type into several categories, with each category
+    # represented by a different python dictionary.  The (meta)task categories
+    # and corresponding dictionaries are as follows:
     #
-    # To make it easier to remove various sets of tasks from the workflow
-    # (because settings in the dtc-vx-workflow config file, e.g. GET_OBS_ONLY,
-    # VX_FIELD_GROUPS, etc require it), we split the complete list of (meta)tasks
-    # for each obs type into the following categories (with a corresponding
-    # dictionary for each category):
-    #
-    #   - getobs (meta)tasks (getobs_metatasks_...)
-    #   - obs preprocessing (meta)tasks (obspre_metatasks_...)
-    #   - forecast preprocessing (meta)tasks (fcstpre_metatasks_...)
-    #   - deterministic verification (meta)tasks (vxdet_metatasks_...)
-    #   - ensemble verification (meta)tasks (vxens_metatasks_...)
+    #     (Meta)task Category                Dictionary
+    #     -------------------                ----------
+    #   - Observation retrieval              getobs_metatasks_by_obtype
+    #   - Observations pre-processing        obspre_metatasks_by_obtype
+    #   - Forecast pre-processing            fcstpre_metatasks_by_obtype
+    #   - Deterministic verification         vxdet_metatasks_by_obtype
+    #   - Ensemble verification              vxens_metatasks_by_obtype
     #
     # Note that if the metatask specification depends on the field group, it
     # does not need to be listed here because those metatasks will be removed
@@ -667,12 +667,12 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
 
     # Get flag that specifies whether to keep only the get_obs_... tasks in
     # the workflow.
-    get_obs_only = vx_config["GET_OBS_ONLY"]
+    obs_only = vx_config["OBS_ONLY"]
 
     # If there are no field groups specified for verification, remove those
     # tasks that are common to all observation types.
     field_groups_to_process = vx_config["VX_FIELD_GROUPS"]
-    if not field_groups_to_process or get_obs_only:
+    if not field_groups_to_process or obs_only:
         metatask = "metatask_check_post_output_all_mems"
         if not field_groups_to_process:
             logging.info(
@@ -684,13 +684,13 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
                 groups to verify that need this (meta)task)."""
                 )
             )
-        elif get_obs_only:
+        elif obs_only:
             logging.info(
                 dedent(
                     f"""
                 Removing verification (meta)task
                     "{metatask}"
-                from workflow because GET_OBS_ONLY is set to True.""" 
+                from workflow because OBS_ONLY is set to True.""" 
                 )
             )
         rocoto_config["tasks"].pop(metatask)
@@ -714,20 +714,18 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         # the list of obs (meta)tasks to run for this obs type to the complete
         # list of obs (meta)tasks for the obs type.  Then set the list of vx
         # (meta)tasks to run for the obs type to either an empty list (if
-        # GET_OBS_ONLY is True, meaning only obs (meta)tasks will be run) or to
-        # the complete list of vx (meta)tasks for the obs type (if GET_OBS_ONLY
-        # is False).
+        # OBS_ONLY is True, meaning only obs (meta)tasks will be run) or to the
+        # complete list of vx (meta)tasks for the obs type (if OBS_ONLY is False).
         if field_groups_to_process_crnt_obtype:
             obs_metatasks_to_run_crnt_obtype = obs_metatasks_crnt_obtype
-            if get_obs_only:
+            if obs_only:
                 if vx_metatasks_crnt_obtype:
                     logging.info(
                         dedent(
                             f"""
                         Will remove all verification (meta)tasks for observation type "{obtype}"
                         from the workflow (but will keep all obs tasks, e.g. get_obs_...) because
-                        GET_OBS_ONLY has been set to True.  The verification tasks to be removed
-                        are:
+                        OBS_ONLY has been set to True.  The verification tasks to be removed are:
                             {vx_metatasks_crnt_obtype}"""
                         )
                     )
@@ -775,8 +773,7 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
                 Removing verification (meta)task
                     "{metatask}"
                 from workflow since either no field groups in VX_FIELD_GROUPS need this
-                (meta)task for verification or because GET_OBS_ONLY is set to True (or
-                both)."""
+                (meta)task for verification or because OBS_ONLY is set to True (or both)."""
                 )
             )
             rocoto_config["tasks"].pop(metatask)
@@ -809,7 +806,6 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
     for metatask in rocoto_tasks:
         msg = f'    ' + metatask
         logging.info(msg)
-    alsdkfjlaskdjf
     #
     # -----------------------------------------------------------------------
     #
