@@ -1,0 +1,139 @@
+default_task_fcstpre: &default_task_fcstpre
+  account: '&ACCOUNT;'
+  attrs:
+    cycledefs: cycledefs_obs_days_inst
+    maxtries: 1
+  envars: &default_vars
+    GLOBAL_VAR_DEFNS_FP: '&GLOBAL_VAR_DEFNS_FP;'
+    USHdir: '&USHdir;'
+    YYMMDD:
+      cyclestr:
+        value: '@Y@m@d'
+    HH:
+      cyclestr:
+        value: '@H'
+    MET_INSTALL_DIR: '&MET_INSTALL_DIR;'
+    METPLUS_ROOT: '&METPLUS_ROOT;'
+    LOGDIR:
+      cyclestr:
+        value: '&LOGDIR;'
+    nprocs: '{{ verification_resources.execution.nodes * verification_resources.execution.tasks_per_node }}'
+  join:
+    cyclestr:
+      value: '&LOGDIR;/{{ jobname }}_@Y@m@d@H&LOGEXT;'
+  memory: '{{ "2G" if user.MACHINE not in ["NOAACLOUD"] }}'
+  native: '{{ platform.SCHED_NATIVE_CMD }}'
+  nodes: '{{ verification_resources.execution.nodes }}:ppn={{ verification_resources.execution.tasks_per_node }}'
+  partition: '{{ "&PARTITION_DEFAULT;" if platform.get("PARTITION_DEFAULT") }}'
+  queue: '&QUEUE_DEFAULT;'
+
+
+metatask_check_post_output_all_mems:
+  var:
+    mem: '{% if ensemble.DO_ENSEMBLE %}{% for m in range(1, ensemble.NUM_ENS_MEMBERS+1) %}{{ "%03d "%m }}{%- endfor -%} {% else %}{{ "000"|string }}{% endif %}'
+  task_check_post_output_mem#mem#:
+    <<: *default_task_fcstpre
+    attrs:
+      cycledefs: forecast
+      maxtries: 1
+    command: "&JOBSdir;/CHECK_POST_OUTPUT.sh"
+    envars:
+      <<: *default_vars
+      ENSMEM_INDX: '#mem#'
+    walltime: "{{ verification_resources.execution.check_post_output.walltime }}"
+    dependency:
+      # Metataskdep here is for the default running standalone post tasks. When running inline post,
+      # or no forecast tasks at all, this section is replaced by logic in setup.py.
+      metataskdep:
+        attrs:
+          metatask: run_post_mem#mem#_all_fhrs
+
+metatask_PcpCombine_APCP_all_accums_all_mems:
+  var:
+    ACCUM_HH: '{% for ah in verification.VX_APCP_ACCUMS_HRS %}{% if workflow.FCST_LEN_HRS >= ah %}{{ "%02d " % ah }}{% endif %}{% endfor %}'
+  metatask_PcpCombine_APCP#ACCUM_HH#h_all_mems:
+    var:
+      mem: '{% if ensemble.DO_ENSEMBLE %}{% for m in range(1, ensemble.NUM_ENS_MEMBERS+1) %}{{ "%03d "%m }}{%- endfor -%} {% else %}{{ "000"|string }}{% endif %}'
+    task_run_MET_PcpCombine_APCP#ACCUM_HH#h_fcst_mem#mem#:
+      <<: *default_task_fcstpre
+      attrs:
+        cycledefs: forecast
+        maxtries: 2
+      command: "&JOBSdir;/PCPCOMBINE.sh"
+      walltime: "{{ verification_resources.execution.pcpcombine.fcst.walltime }}"
+      envars:
+        <<: *default_vars
+        FIELD_GROUP: 'APCP'
+        ACCUM_HH: '#ACCUM_HH#'
+        FCST_OR_OBS: FCST
+        OBTYPE: CCPA
+        OBS_DIR: '&CCPA_OBS_DIR;'
+        METPLUSTOOLNAME: 'PCPCOMBINE'
+        ENSMEM_INDX: "#mem#"
+      dependency:
+        datadep:
+          attrs:
+            age: 00:00:00:30
+          value:
+            cyclestr:
+              value: '{{ workflow.EXPTDIR }}/@Y@m@d@H/post_files_exist_mem#mem#.txt'
+
+metatask_PcpCombine_ASNOW_all_accums_all_mems:
+  var:
+    ACCUM_HH: '{% for ah in verification.VX_ASNOW_ACCUMS_HRS %}{% if workflow.FCST_LEN_HRS >= ah %}{{ "%02d " % ah }}{% endif %}{% endfor %}'
+  metatask_PcpCombine_ASNOW#ACCUM_HH#h_all_mems:
+    var:
+      mem: '{% if ensemble.DO_ENSEMBLE %}{% for m in range(1, ensemble.NUM_ENS_MEMBERS+1) %}{{ "%03d "%m }}{%- endfor -%} {% else %}{{ "000"|string }}{% endif %}'
+    task_run_MET_PcpCombine_ASNOW#ACCUM_HH#h_fcst_mem#mem#:
+      <<: *default_task_fcstpre
+      attrs:
+        cycledefs: forecast
+        maxtries: 2
+      command: "&JOBSdir;/PCPCOMBINE.sh"
+      walltime: "{{ verification_resources.execution.pcpcombine.fcst.walltime }}"
+      envars:
+        <<: *default_vars
+        FIELD_GROUP: 'ASNOW'
+        ACCUM_HH: '#ACCUM_HH#'
+        FCST_OR_OBS: FCST
+        OBTYPE: NOHRSC
+        OBS_DIR: '&NOHRSC_OBS_DIR;'
+        METPLUSTOOLNAME: 'PCPCOMBINE'
+        ENSMEM_INDX: "#mem#"
+      dependency:
+        datadep:
+          attrs:
+            age: 00:00:00:30
+          value:
+            cyclestr:
+              value: '{{ workflow.EXPTDIR }}/@Y@m@d@H/post_files_exist_mem#mem#.txt'
+
+metatask_PcpCombine_fcst_PM_all_mems:
+  var:
+    PM: '{% for var in verification.VX_FIELD_GROUPS %}{{ ("%s " % var) if var in ["PM25", "PM10"] }}{% endfor %}'
+  metatask_PcpCombine_fcst_#PM#_all_mems:
+    var:
+      mem: '{% if ensemble.DO_ENSEMBLE %}{% for m in range(1, ensemble.NUM_ENS_MEMBERS+1) %}{{ "%03d "%m }}{%- endfor -%} {% else %}{{ "000"|string }}{% endif %}'
+    task_run_MET_PcpCombine_fcst_#PM#_mem#mem#:
+      <<: *default_task_fcstpre
+      attrs:
+        cycledefs: forecast
+        maxtries: 2
+      command: "&JOBSdir;/PCPCOMBINE.sh"
+      walltime: "{{ verification_resources.execution.pcpcombine.fcst.walltime }}"
+      envars:
+        <<: *default_vars
+        FIELD_GROUP: '#PM#'
+        ACCUM_HH: '01'
+        FCST_OR_OBS: FCST
+        OBTYPE: AIRNOW
+        OBS_DIR: '&AIRNOW_OBS_DIR;'
+        METPLUSTOOLNAME: 'PCPCOMBINE'
+        ENSMEM_INDX: "#mem#"
+      dependency:
+        datadep:
+          attrs:
+            age: 00:00:00:30
+          value:
+            cyclestr:
+              value: '{{ workflow.EXPTDIR }}/@Y@m@d@H/post_files_exist_mem#mem#.txt'
