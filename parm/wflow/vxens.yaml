@@ -1,4 +1,4 @@
-default_task_verify_ens: &default_task_verify_ens
+default_task_vxens: &default_task_vxens
   account: '&ACCOUNT;'
   attrs:
     cycledefs: forecast
@@ -31,7 +31,7 @@ metatask_GenEnsProd_EnsembleStat_APCP_all_accums:
   var:
     ACCUM_HH: '{% for ah in verification.VX_APCP_ACCUMS_HRS %}{% if workflow.FCST_LEN_HRS >= ah %}{{ "%02d " % ah }}{% endif %}{% endfor %}'
   task_run_MET_GenEnsProd_vx_APCP#ACCUM_HH#h: &task_GenEnsProd_CCPA
-    <<: *default_task_verify_ens
+    <<: *default_task_vxens
     command: "&JOBSdir;/GENENSPROD_OR_ENSEMBLESTAT.sh"
     envars: &envars_GenEnsProd_CCPA
       <<: *default_vars
@@ -68,7 +68,7 @@ metatask_GenEnsProd_EnsembleStat_ASNOW_all_accums:
   var:
     ACCUM_HH: '{% for ah in verification.VX_ASNOW_ACCUMS_HRS %}{% if workflow.FCST_LEN_HRS >= ah %}{{ "%02d " % ah }}{% endif %}{% endfor %}'
   task_run_MET_GenEnsProd_vx_ASNOW#ACCUM_HH#h: &task_GenEnsProd_NOHRSC
-    <<: *default_task_verify_ens
+    <<: *default_task_vxens
     command: "&JOBSdir;/GENENSPROD_OR_ENSEMBLESTAT.sh"
     envars: &envars_GenEnsProd_NOHRSC
       <<: *default_vars
@@ -106,7 +106,7 @@ metatask_GenEnsProd_EnsembleStat_REFC_RETOP:
   var:
     FIELD_GROUP: '{% for var in verification.VX_FIELD_GROUPS %}{% if var in ["REFC", "RETOP"] %}{{ "%s " % var }}{% endif %}{% endfor %}'
   task_run_MET_GenEnsProd_vx_#FIELD_GROUP#: &task_GenEnsProd_MRMS
-    <<: *default_task_verify_ens
+    <<: *default_task_vxens
     command: "&JOBSdir;/GENENSPROD_OR_ENSEMBLESTAT.sh"
     envars: &envars_GenEnsProd_MRMS
       <<: *default_vars
@@ -149,7 +149,7 @@ metatask_GenEnsProd_EnsembleStat_SFC_UPA:
   var:
     FIELD_GROUP: '{% for var in verification.VX_FIELD_GROUPS %}{% if var in ["SFC", "UPA"] %}{{ "%s " % var }}{% endif %}{% endfor %}'
   task_run_MET_GenEnsProd_vx_#FIELD_GROUP#: &task_GenEnsProd_NDAS
-    <<: *default_task_verify_ens
+    <<: *default_task_vxens
     command: "&JOBSdir;/GENENSPROD_OR_ENSEMBLESTAT.sh"
     envars: &envars_GenEnsProd_NDAS
       <<: *default_vars
@@ -194,7 +194,7 @@ metatask_GridStat_APCP_all_accums_ensmeanprob:
     var:
       ACCUM_HH: '{% for ah in verification.VX_APCP_ACCUMS_HRS %}{% if workflow.FCST_LEN_HRS >= ah %}{{ "%02d " % ah }}{% endif %}{% endfor %}'
     task_run_MET_GridStat_vx_APCP#ACCUM_HH#h_ens#statlc#:
-      <<: *default_task_verify_ens
+      <<: *default_task_vxens
       command: "&JOBSdir;/GRIDSTAT_OR_POINTSTAT_ENS#stat#.sh"
       envars:
         <<: *default_vars
@@ -223,7 +223,7 @@ metatask_GridStat_ASNOW_all_accums_ensmeanprob:
     var:
       ACCUM_HH: '{% for ah in verification.VX_ASNOW_ACCUMS_HRS %}{% if workflow.FCST_LEN_HRS >= ah %}{{ "%02d " % ah }}{% endif %}{% endfor %}'
     task_run_MET_GridStat_vx_ASNOW#ACCUM_HH#h_ens#statlc#:
-      <<: *default_task_verify_ens
+      <<: *default_task_vxens
       command: "&JOBSdir;/GRIDSTAT_OR_POINTSTAT_ENS#stat#.sh"
       envars:
         <<: *default_vars
@@ -248,7 +248,7 @@ metatask_GridStat_REFC_RETOP_ensprob:
   var:
     FIELD_GROUP: '{% for var in verification.VX_FIELD_GROUPS %}{% if var in ["REFC", "RETOP"] %}{{ "%s " % var }}{% endif %}{% endfor %}'
   task_run_MET_GridStat_vx_#FIELD_GROUP#_ensprob:
-    <<: *default_task_verify_ens
+    <<: *default_task_vxens
     command: "&JOBSdir;/GRIDSTAT_OR_POINTSTAT_ENSPROB.sh"
     envars:
       <<: *default_vars
@@ -277,7 +277,7 @@ metatask_PointStat_SFC_UPA_ensmeanprob:
     var:
       FIELD_GROUP: '{% for var in verification.VX_FIELD_GROUPS %}{% if var in ["SFC", "UPA"] %}{{ "%s " % var }}{% endif %}{% endfor %}'
     task_run_MET_PointStat_vx_#FIELD_GROUP#_ens#statlc#:
-      <<: *default_task_verify_ens
+      <<: *default_task_vxens
       command: "&JOBSdir;/GRIDSTAT_OR_POINTSTAT_ENS#stat#.sh"
       envars:
         <<: *default_vars

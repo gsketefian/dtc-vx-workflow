@@ -1,4 +1,4 @@
-default_task_tc: &default_task_tc
+default_task_vxtc: &default_task_vxtc
   account: '&ACCOUNT;'
   attrs: &default_attrs
     cycledefs: forecast
@@ -26,7 +26,7 @@ default_task_tc: &default_task_tc
   queue: '&QUEUE_DEFAULT;'
 
 task_tcpairs:
-  <<: *default_task_tc
+  <<: *default_task_vxtc
   command: "&JOBSdir;/TCPAIRS.sh"
   envars:
     <<: *default_vars
@@ -42,7 +42,7 @@ task_tcpairs:
   walltime: "{{ tcpairs.execution.walltime }}"
 
 task_tcstat:
-  <<: *default_task_tc
+  <<: *default_task_vxtc
   command: "&JOBSdir;/TCSTAT.sh"
   envars:
     <<: *default_vars
@@ -59,7 +59,7 @@ task_tcstat:
         task: tcpairs
 
 task_tcrmw:
-  <<: *default_task_tc
+  <<: *default_task_vxtc
   command: "&JOBSdir;/TCRMW.sh"
   envars:
     <<: *default_vars

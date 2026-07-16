@@ -1,4 +1,4 @@
-default_task_verify_det: &default_task_verify_det
+default_task_vxdet: &default_task_vxdet
   account: '&ACCOUNT;'
   attrs: &default_attrs
     cycledefs: forecast
@@ -34,7 +34,7 @@ metatask_GridStat_APCP_all_accums_all_mems:
     var:
       mem: '{% if ensemble.DO_ENSEMBLE %}{% for m in range(1, ensemble.NUM_ENS_MEMBERS+1) %}{{ "%03d "%m }}{%- endfor -%} {% else %}{{ "000"|string }}{% endif %}'
     task_run_MET_GridStat_vx_APCP#ACCUM_HH#h_mem#mem#:
-      <<: *default_task_verify_det
+      <<: *default_task_vxdet
       attrs:
         <<: *default_attrs
         maxtries: 2
@@ -68,7 +68,7 @@ metatask_GridStat_ASNOW_all_accums_all_mems:
     var:
       mem: '{% if ensemble.DO_ENSEMBLE %}{% for m in range(1, ensemble.NUM_ENS_MEMBERS+1) %}{{ "%03d "%m }}{%- endfor -%} {% else %}{{ "000"|string }}{% endif %}'
     task_run_MET_GridStat_vx_ASNOW#ACCUM_HH#h_mem#mem#:
-      <<: *default_task_verify_det
+      <<: *default_task_vxdet
       attrs:
         <<: *default_attrs
         maxtries: 2
@@ -102,7 +102,7 @@ metatask_GridStat_REFC_RETOP_all_mems:
     var:
       FIELD_GROUP: '{% for var in verification.VX_FIELD_GROUPS %}{% if var in ["REFC", "RETOP"] %}{{ "%s " % var }}{% endif %}{% endfor %}'
     task_run_MET_GridStat_vx_#FIELD_GROUP#_mem#mem#:
-      <<: *default_task_verify_det
+      <<: *default_task_vxdet
       command: "&JOBSdir;/GRIDSTAT_OR_POINTSTAT.sh"
       envars:
         <<: *default_vars
@@ -134,13 +134,8 @@ metatask_GridStat_REFC_RETOP_all_mems:
               cyclestr:
                 value: '{{ workflow.EXPTDIR }}/@Y@m@d@H/post_files_exist_mem#mem#.txt'
 
-metatask_PointStat: &default_pointstat_metatask
-  var: &default_pointstat_metatask_var
-    # Having variables that are unset as below will cause the workflow
-    # generation to remove the whole metatask, so this metatask will be
-    # removed.  But that is what we want in this case because we are using
-    # this (generic) metatask only as a template for the field-group-specific
-    # PointStat metatasks below.
+default_metatask_PointStat: &default_metatask_PointStat
+  var: &default_metatask_PointStat_var
     FIELD_GROUP:
     METAOBTYPE:
     METAOBS_DIR:
@@ -149,7 +144,7 @@ metatask_PointStat: &default_pointstat_metatask
     var:
       mem: '{% if ensemble.DO_ENSEMBLE %}{% for m in range(1, ensemble.NUM_ENS_MEMBERS+1) %}{{ "%03d "%m }}{%- endfor -%} {% else %}{{ "000"|string }}{% endif %}'
     task_run_MET_PointStat_vx_#FIELD_GROUP#_mem#mem#:
-      <<: *default_task_verify_det
+      <<: *default_task_vxdet
       command: "&JOBSdir;/GRIDSTAT_OR_POINTSTAT.sh"
       envars:
         <<: *default_vars
@@ -190,27 +185,27 @@ metatask_PointStat: &default_pointstat_metatask
                 task: 'run_MET_PcpCombine_fcst_#FIELD_GROUP#_mem#mem#'
 
 metatask_PointStat_SFC_UPA_all_mems:
-  <<: *default_pointstat_metatask
+  <<: *default_metatask_PointStat
   var:
-    <<: *default_pointstat_metatask_var
+    <<: *default_metatask_PointStat_var
     FIELD_GROUP: 'SFC UPA '
     METAOBTYPE: 'NDAS NDAS '
     METAOBS_DIR: '&NDAS_OBS_DIR; &NDAS_OBS_DIR; '
     METAOB_AVAIL_HRS: '{{ verification.NDAS_OBS_AVAIL_INTVL_HRS }} {{ verification.NDAS_OBS_AVAIL_INTVL_HRS }}'
 
 metatask_PointStat_AOD_all_mems:
-  <<: *default_pointstat_metatask
+  <<: *default_metatask_PointStat
   var:
-    <<: *default_pointstat_metatask_var
+    <<: *default_metatask_PointStat_var
     FIELD_GROUP: 'AOD '
     METAOBTYPE: 'AERONET '
     METAOBS_DIR: '&AERONET_OBS_DIR; '
     METAOB_AVAIL_HRS: '{{ verification.AERONET_OBS_AVAIL_INTVL_HRS }} '
 
 metatask_PointStat_PM25_PM10_all_mems:
-  <<: *default_pointstat_metatask
+  <<: *default_metatask_PointStat
   var:
-    <<: *default_pointstat_metatask_var
+    <<: *default_metatask_PointStat_var
     FIELD_GROUP: 'PM25 PM10 '
     METAOBTYPE: 'AIRNOW AIRNOW '
     METAOBS_DIR: '&AIRNOW_OBS_DIR; &AIRNOW_OBS_DIR; '
