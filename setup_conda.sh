@@ -8,12 +8,29 @@
 # (conda_loc, conda/, environment.yml) work regardless of the caller's CWD.
 SCRIPT_DIR=$(builtin cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
+# When sourcing this script from other scripts that are non-interactive,
+# this script should also be non-interactive.  For this purpose, add the
+# --non-interactive flag to support non-interactive mode.  In this mode,
+# this script behaves as follows:
+#
+# - Use existing conda build under "${SCRIPT_DIR}/conda"?  No
+# - Use existing system-level conda?  No
+# - Check vx_workflow env for updates?  No
+NON_INTERACTIVE=false
+if [ "$1" = "--non-interactive" ] ; then
+  NON_INTERACTIVE=true
+fi
+
 # If the conda location file does not exist but a conda installation exists under
 # dtc-vx-workflow/ from a previous installation, check if user wants to use it.
 # This is a legacy check for environments created with an older version of this script
 if [ ! -f "${SCRIPT_DIR}/conda_loc" ] && [ -d "${SCRIPT_DIR}/conda" ] ; then
   echo "Found existing conda installation in conda/ subdirectory"
-  read -p "Do you want to use the existing conda build? (y/n) " -r
+  if [ "${NON_INTERACTIVE}" = true ] ; then
+    REPLY="y"
+  else
+    read -p "Do you want to use the existing conda build? (y/n) " -r
+  fi
   echo
   if [[ $REPLY =~ ^[Yy]$ ]] ; then
     EXISTING_CONDA_BUILD="$(builtin cd "${SCRIPT_DIR}/conda" && pwd)"
@@ -26,8 +43,12 @@ fi
 USE_SYSTEM_CONDA=false
 if [ ! -f "${SCRIPT_DIR}/conda_loc" ] && command -v conda &> /dev/null ; then
   CONDA_BASE=$(conda info --base)
-  echo "Found existing conda installation at: ${CONDA_BASE}"
-  read -p "Do you want to use your existing system conda? (y/n) " -r
+  echo "Found existing system-level conda installation at: ${CONDA_BASE}"
+  if [ "${NON_INTERACTIVE}" = true ] ; then
+    REPLY="n"
+  else
+    read -p "Do you want to use your existing system-level conda? (y/n) " -r
+  fi
   echo
   if [[ $REPLY =~ ^[Yy]$ ]] ; then
     USE_SYSTEM_CONDA=true
@@ -39,10 +60,10 @@ if [ ! -f "${SCRIPT_DIR}/conda_loc" ] && command -v conda &> /dev/null ; then
     echo "Proceeding with local conda installation..."
   fi
 else
-  echo "No existing conda installation detected"
+  echo "No existing system-level conda installation detected"
 fi
 
-if [ "$USE_SYSTEM_CONDA" = false ] ; then
+if [ "${USE_SYSTEM_CONDA}" = false ] ; then
   if [ -f "${SCRIPT_DIR}/conda_loc" ] ; then
     CONDA_BUILD_DIR=$(cat "${SCRIPT_DIR}/conda_loc")
     echo "Using conda from conda_loc: ${CONDA_BUILD_DIR}"
@@ -76,12 +97,12 @@ if [ "$USE_SYSTEM_CONDA" = false ] ; then
   fi
   echo "Local conda build location: ${CONDA_BUILD_DIR}"
 
-  if [[ ! "$PATH" =~ "$CONDA_BUILD_DIR" ]]; then
+  if [[ ! "$PATH" =~ "${CONDA_BUILD_DIR}" ]]; then
     export PATH=${CONDA_BUILD_DIR}/condabin:${CONDA_BUILD_DIR}/bin:${PATH}
   fi
   if [[ -z "${LD_LIBRARY_PATH:-}" ]]; then
     export LD_LIBRARY_PATH=${CONDA_BUILD_DIR}/lib
-  elif [[ ! "${LD_LIBRARY_PATH}" =~ "$CONDA_BUILD_DIR" ]]; then
+  elif [[ ! "${LD_LIBRARY_PATH}" =~ "${CONDA_BUILD_DIR}" ]]; then
     export LD_LIBRARY_PATH=${CONDA_BUILD_DIR}/lib:${LD_LIBRARY_PATH}
   fi
 fi
@@ -92,7 +113,11 @@ if ! conda env list | grep -q "^vx_workflow\s" ; then
   echo "Creating vx_workflow environment..."
   mamba env create -n vx_workflow --file "${SCRIPT_DIR}/environment.yml" --quiet
 else
-  read -p "vx_workflow environment has already been built. Check for updates using environment.yml? (y/n) " -r
+  if [ "${NON_INTERACTIVE}" = true ] ; then
+    REPLY="n"
+  else
+    read -p "vx_workflow environment has already been built. Check for updates using environment.yml? (y/n) " -r
+  fi
   echo
   if [[ $REPLY =~ ^[Yy]$ ]] ; then
     echo "Updating vx_workflow environment..."

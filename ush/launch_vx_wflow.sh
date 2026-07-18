@@ -105,9 +105,16 @@ expt_name="${EXPT_SUBDIR}"
 #-----------------------------------------------------------------------
 #
 machine=$(echo_lowercase $MACHINE)
-
-source ${USHdir}/../setup_conda.sh
-
+#
+#-----------------------------------------------------------------------
+#
+# Set up the conda environment for dtc-vx-workflow.  Call setup_conda.sh
+# in non-interactive mode because this script is usually expected to 
+# behave non-interactively (e.g. when called from a cron job).
+#
+#-----------------------------------------------------------------------
+#
+source ${USHdir}/../setup_conda.sh --non-interactive
 #
 #-----------------------------------------------------------------------
 #
