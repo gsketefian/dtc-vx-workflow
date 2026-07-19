@@ -835,26 +835,6 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
             logging.error(msg)
             raise ValueError(msg)
 
-    #
-    # -------------------------------------------------------------------
-    #
-    # Set dependencies for verification tasks that depend on post output
-    #
-    # -------------------------------------------------------------------
-    #
-    run_vx_check = rocoto_config["tasks"].get("metatask_check_post_output_all_mems")
-    if run_vx_check:
-        run_vx_check["task_check_post_output_mem#mem#"]["dependency"] = {
-            "or": {
-                "and": {
-                  "taskvalid": {"attrs": {"task": "run_fcst__mem#mem#"}},
-                  "taskdep": {"attrs": {"task": "run_fcst__mem#mem#"}},
-                },
-                "not": {
-                  "taskvalid": {"attrs": {"task": "run_fcst__mem#mem#"}},
-                },
-            },
-        }
 
     # remove the data key -- it's not needed beyond this point
     if "data" in expt_config:

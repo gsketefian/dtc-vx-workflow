@@ -41,12 +41,6 @@ metatask_check_post_output_all_mems:
       <<: *default_vars
       ENSMEM_INDX: '#mem#'
     walltime: "{{ verification_resources.execution.check_post_output.walltime }}"
-    dependency:
-      # Metataskdep here is for the default running standalone post tasks. When running inline post,
-      # or no forecast tasks at all, this section is replaced by logic in setup.py.
-      metataskdep:
-        attrs:
-          metatask: run_post_mem#mem#_all_fhrs
 
 metatask_PcpCombine_APCP_all_accums_all_mems:
   var:
