@@ -704,14 +704,32 @@ verification:
   #
 
   #
-  # OBS_ONLY:
-  # Flag that causes only obs-related tasks (e.g. get_obs_...) to be run
-  # in the workflow.  All tasks that preprocess forecast files and run
-  # either deterministic or ensemble verification are removed from the
-  # workflow.  This is useful if the user only wants to pull and process
-  # obs data.
+  # RUN_<categ>:
+  # Flags that determine which categories of (meta)tasks to include in 
+  # the rocoto workflow.  The values that <categ> can take on and the
+  # corresponding categories are as follows:
   #
-  OBS_ONLY: False
+  #   <categ>       (Meta)task Category               
+  #   -------       -------------------               
+  #   GETOBS        Observation retrieval             
+  #   OBSPRE        Observations pre-processing       
+  #   FCSTPRE       Forecast pre-processing           
+  #   VXDET         Deterministic verification        
+  #   VXENS         Ensemble verification             
+  #   VXTC          Tropical cyclone verification             
+  #   MODE          MODE (object) verification             
+  #
+  # For example, RUN_GETOBS determines whether the observation retrieval
+  # tasks will be run as part of the workflow (for all obs types that have
+  # at least one field group specified in VX_FIELD_GROUPS). 
+  #
+  RUN_GETOBS: True
+  RUN_OBSPRE: True
+  RUN_FCSTPRE: True
+  RUN_VXDET: True
+  RUN_VXENS: False
+  RUN_VXTC: False 
+  RUN_MODE: False 
   #
   # *_OBS_AVAIL_INTVL_HRS:
   # Time interval (in hours) at which various types of obs are available

@@ -106,20 +106,64 @@ def load_config_for_setup(ushdir, default_config_path, user_config_path):
     # Set the path to the top-level workflow directory
     homedir = Path(__file__).parent.parent.resolve()
     default_config["user"]["HOMEdir"] = str(homedir)
+#
+# -----------------------------------------------------------------------
+#
+# Get flags that determine which categories of (meta)tasks to include in
+# the rocoto workflow.  Then create a preliminary dictionary of tasks
+# under default_config.
+#
+# -----------------------------------------------------------------------
+#
+    vx_config = default_config["verification"]
+
+    run_getobs = vx_config["RUN_GETOBS"]
+    run_obspre = vx_config["RUN_OBSPRE"]
+    run_fcstpre = vx_config["RUN_FCSTPRE"]
+    run_vxdet = vx_config["RUN_VXDET"]
+    run_vxens = vx_config["RUN_VXENS"]
+    run_vxtc = vx_config["RUN_VXTC"]
+    run_mode = vx_config["RUN_MODE"]
+
+    print(f'')
+    print(f'{run_getobs = }')
+    print(f'{run_obspre = }')
+    print(f'{run_fcstpre = }')
+    print(f'{run_vxdet = }')
+    print(f'{run_vxens = }')
+    print(f'{run_vxtc = }')
+    print(f'{run_mode = }')
+
+    # Create list of taskgroup files (defining different sets of workflow
+    # (meta)tasks) to add to the rocoto workflow.
+    taskgroups = []
+    if run_getobs:
+        taskgroups.append('getobs.yaml')
+    if run_obspre:
+        taskgroups.append('obspre.yaml')
+    if run_fcstpre:
+        taskgroups.append('fcstpre.yaml')
+    if run_vxdet:
+        taskgroups.append('vxdet.yaml')
+    if run_vxens:
+        taskgroups.append('vxens.yaml')
+    if run_vxtc:
+        taskgroups.append('vxtc.yaml')
+    if run_mode:
+        taskgroups.append('mode.yaml')
 
     # Expand out the workflow tasks now that all settings have been applied
-    taskgroups = default_config["workflow"]["taskgroups"]
+#    taskgroups = default_config["workflow"]["taskgroups"]
     default_config["rocoto"]["tasks"] = {}
     for taskgroup in taskgroups:
-        tasks = get_yaml_config(homedir / taskgroup)
+        tasks = get_yaml_config(homedir / 'parm/wflow' / taskgroup)
+        # Keep only those tasks whose names don't start with "default_".
         keep = {k: v for k, v in tasks.items() if not re.search(r"^default_*", k)}
         default_config["rocoto"]["tasks"].update(keep)
-
 
     # Update one more time in case there are user or machine settings to override the tasks
     for cfg in (machine_config, user_config):
         default_config.update_from(cfg)
-
 
     # Special logic if EXPT_BASEDIR is a relative path; see config_defaults.yaml for explanation
     expt_basedir = default_config["workflow"]["EXPT_BASEDIR"]
@@ -489,13 +533,11 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
     #
     # -----------------------------------------------------------------------
     #
-    # Depending on the settings of various flags in the dtc-vx-workflow config
-    # file (e.g. OBS_ONLY, VX_FIELD_GROUPS, DO_ENSEMBLE, etc), some (meta)tasks
-    # may have to be removed from the workflow.  To make it easier to determine
-    # which (meta)tasks need to be removed (and which kept), we group the (meta)
-    # tasks for each obs type into several categories, with each category
-    # represented by a different python dictionary.  The (meta)task categories
-    # and corresponding dictionaries are as follows:
+    # Create dictionaries that group the complete set of (meta)tasks in the
+    # workflow into categories.  This is useful when constructing the final
+    # set of (meta)tasks for the experiment that will usually be a subset of
+    # the complete set.  The (meta)task categories and the corresponding
+    # dictionaries used below for each are as follows:
     #
     #     (Meta)task Category                Dictionary
     #     -------------------                ----------
@@ -518,6 +560,38 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
     fcstpre_metatasks_by_obtype = {}
     vxdet_metatasks_by_obtype = {}
     vxens_metatasks_by_obtype = {}
+    vxtc_metatasks_by_obtype = {}
+    mode_metatasks_by_obtype = {}
+
+#
+# The following are (meta)tasks from the workflow template files that are
+# still not categorized into any of the arrays below.
+#
+# 1:default_task_getobs: &default_task_getobs
+# 
+# 1:default_task_obspre: &default_task_obspre
+# 53:metatask_ASCII2nc_obs:
+# 
+# 1:default_task_fcstpre: &default_task_fcstpre
+# 31:metatask_check_post_output_all_mems:    <-- included
+# 111:metatask_PcpCombine_fcst_PM_all_mems:  <-- not included yet.
+# 
+# 1:default_task_verify_det: &default_task_verify_det
+# 137:metatask_PointStat: &default_pointstat_metatask
+# 
+# 1:default_task_verify_ens: &default_task_verify_ens
+# 
+# It's not clear which obtype the TC tasks should go under.  Is it BDECK?
+# 1:default_task_vxtc: &default_task_vxtc
+# 28:task_tcpairs:
+# 44:task_tcstat:
+# 61:task_tcrmw:
+# 
+# It's not clear which obtype the MODE tasks should go under.  Is it GOESAOD?
+# 1:default_task_mode: &default_task_mode
+# 28:task_run_RegridDataPlane_GOESAOD:
+# 46:task_run_MODE_GOESAOD:
+
 
     obtype = "CCPA"
     field_groups_by_obtype[obtype] = ["APCP"]
@@ -528,6 +602,7 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "metatask_PcpCombine_APCP_all_accums_obs_CCPA",
     ]
     fcstpre_metatasks_by_obtype[obtype] = [
+        "metatask_check_post_output_all_mems",
         "metatask_PcpCombine_APCP_all_accums_all_mems",
     ]
     vxdet_metatasks_by_obtype[obtype] = [
@@ -537,6 +612,8 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "metatask_GenEnsProd_EnsembleStat_APCP_all_accums",
         "metatask_GridStat_APCP_all_accums_ensmeanprob",
     ]
+    vxtc_metatasks_by_obtype[obtype] = []
+    mode_metatasks_by_obtype[obtype] = []
 
     obtype = "NOHRSC"
     field_groups_by_obtype[obtype] = ["ASNOW"]
@@ -547,6 +624,7 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "metatask_PcpCombine_ASNOW_all_accums_obs_NOHRSC",
     ]
     fcstpre_metatasks_by_obtype[obtype] = [
+        "metatask_check_post_output_all_mems",
         "metatask_PcpCombine_ASNOW_all_accums_all_mems",
     ]
     vxdet_metatasks_by_obtype[obtype] = [
@@ -556,6 +634,8 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "metatask_GenEnsProd_EnsembleStat_ASNOW_all_accums",
         "metatask_GridStat_ASNOW_all_accums_ensmeanprob",
     ]
+    vxtc_metatasks_by_obtype[obtype] = []
+    mode_metatasks_by_obtype[obtype] = []
 
     obtype = "MRMS"
     field_groups_by_obtype[obtype] = ["REFC", "RETOP"]
@@ -563,7 +643,9 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "task_get_obs_mrms",
     ]
     obspre_metatasks_by_obtype[obtype] = []
-    fcstpre_metatasks_by_obtype[obtype] = []
+    fcstpre_metatasks_by_obtype[obtype] = [
+        "metatask_check_post_output_all_mems",
+    ]
     vxdet_metatasks_by_obtype[obtype] = [
         "metatask_GridStat_REFC_RETOP_all_mems",
     ]
@@ -571,6 +653,8 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "metatask_GenEnsProd_EnsembleStat_REFC_RETOP",
         "metatask_GridStat_REFC_RETOP_ensprob",
     ]
+    vxtc_metatasks_by_obtype[obtype] = []
+    mode_metatasks_by_obtype[obtype] = []
 
     obtype = "NDAS"
     field_groups_by_obtype[obtype] = ["SFC", "UPA"]
@@ -580,7 +664,9 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
     obspre_metatasks_by_obtype[obtype] = [
         "task_run_MET_Pb2nc_obs_NDAS",
     ]
-    fcstpre_metatasks_by_obtype[obtype] = []
+    fcstpre_metatasks_by_obtype[obtype] = [
+        "metatask_check_post_output_all_mems",
+    ]
     vxdet_metatasks_by_obtype[obtype] = [
         "metatask_PointStat_SFC_UPA_all_mems",
     ]
@@ -588,6 +674,8 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "metatask_GenEnsProd_EnsembleStat_SFC_UPA",
         "metatask_PointStat_SFC_UPA_ensmeanprob",
     ]
+    vxtc_metatasks_by_obtype[obtype] = []
+    mode_metatasks_by_obtype[obtype] = []
 
     obtype = "AERONET"
     field_groups_by_obtype[obtype] = ["AOD"]
@@ -595,11 +683,15 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "task_get_obs_aeronet",
     ]
     obspre_metatasks_by_obtype[obtype] = []
-    fcstpre_metatasks_by_obtype[obtype] = []
+    fcstpre_metatasks_by_obtype[obtype] = [
+        "metatask_check_post_output_all_mems",
+    ]
     vxdet_metatasks_by_obtype[obtype] = [
         "metatask_PointStat_AOD_all_mems",
     ]
     vxens_metatasks_by_obtype[obtype] = []
+    vxtc_metatasks_by_obtype[obtype] = []
+    mode_metatasks_by_obtype[obtype] = []
 
     obtype = "AIRNOW"
     field_groups_by_obtype[obtype] = ["PM25", "PM10"]
@@ -607,23 +699,33 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "task_get_obs_airnow",
     ]
     obspre_metatasks_by_obtype[obtype] = []
-    fcstpre_metatasks_by_obtype[obtype] = []
+    fcstpre_metatasks_by_obtype[obtype] = [
+        "metatask_check_post_output_all_mems",
+    ]
     vxdet_metatasks_by_obtype[obtype] = [
         "metatask_PointStat_PM25_PM10_all_mems",
     ]
     vxens_metatasks_by_obtype[obtype] = []
+    vxtc_metatasks_by_obtype[obtype] = []
+    mode_metatasks_by_obtype[obtype] = []
 
     obtype = "GOESAOD"
     field_groups_by_obtype[obtype] = ["GOESAOD"]
     getobs_metatasks_by_obtype[obtype] = [
         "task_get_obs_goes_aod",
     ]
-    obspre_metatasks_by_obtype[obtype] = []
-    fcstpre_metatasks_by_obtype[obtype] = []
+    obspre_metatasks_by_obtype[obtype] = [
+        "task_run_MET_Point2Grid_obs_GOESAOD",
+    ]
+    fcstpre_metatasks_by_obtype[obtype] = [
+        "metatask_check_post_output_all_mems",
+    ]
     vxdet_metatasks_by_obtype["GOESAOD"] = [
         "task_run_MET_Point2Grid_GOESAOD",
     ]
     vxens_metatasks_by_obtype[obtype] = []
+    vxtc_metatasks_by_obtype[obtype] = []
+    mode_metatasks_by_obtype[obtype] = []
 
     obtype = "GOESADP"
     field_groups_by_obtype[obtype] = ["GOESADP"]
@@ -631,30 +733,175 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         "task_get_obs_goes_adp",
     ]
     obspre_metatasks_by_obtype[obtype] = []
-    fcstpre_metatasks_by_obtype[obtype] = []
+    fcstpre_metatasks_by_obtype[obtype] = [
+        "metatask_check_post_output_all_mems",
+    ]
     vxdet_metatasks_by_obtype[obtype] = [
         "task_run_MET_Point2Grid_GOESADP",
     ]
     vxens_metatasks_by_obtype[obtype] = []
+    vxtc_metatasks_by_obtype[obtype] = []
+    mode_metatasks_by_obtype[obtype] = []
+#
+# -----------------------------------------------------------------------
+#
+# Get the config flags that determine which categories of (meta)tasks
+# will be run for each obs type.  These flags have the form
+#
+#   RUN_<categ>
+#
+# where the values that <categ> can take on and the corresponding (meta)task
+# categories are as follows:
+#
+#   <categ>       (Meta)task Category               
+#   -------       -------------------               
+#   GETOBS        Observation retrieval             
+#   OBSPRE        Observations pre-processing       
+#   FCSTPRE       Forecast pre-processing           
+#   VXDET         Deterministic verification        
+#   VXENS         Ensemble verification             
+#   VXTC          Tropical cyclone verification             
+#   MODE          MODE (object) verification             
+#
+# For example, RUN_GETOBS determines whether the observation retrieval
+# tasks will be run (for all obs types that have at least one field group
+# specified in VX_FIELD_GROUPS). 
+#
+# -----------------------------------------------------------------------
+#
+    run_getobs = vx_config["RUN_GETOBS"]
+    run_obspre = vx_config["RUN_OBSPRE"]
+    run_fcstpre = vx_config["RUN_FCSTPRE"]
+    run_vxdet = vx_config["RUN_VXDET"]
+    run_vxens = vx_config["RUN_VXENS"]
+    run_vxtc = vx_config["RUN_VXTC"]
+    run_mode = vx_config["RUN_MODE"]
 
-    ens_config = expt_config["ensemble"]
-    do_ensemble = ens_config["DO_ENSEMBLE"]
-
+    field_groups_to_process = vx_config["VX_FIELD_GROUPS"]
     obtypes_all = field_groups_by_obtype.keys()
-    obs_metatasks_by_obtype = {}
-    vx_metatasks_by_obtype = {}
-    all_metatasks_by_obtype = {}
-    for obtype in obtypes_all:
-        obs_metatasks_by_obtype[obtype] \
-          = getobs_metatasks_by_obtype[obtype] + obspre_metatasks_by_obtype[obtype]
-        vx_metatasks_by_obtype[obtype] \
-          = fcstpre_metatasks_by_obtype[obtype] + vxdet_metatasks_by_obtype[obtype]
-        if do_ensemble:
-            vx_metatasks_by_obtype[obtype] \
-              = vx_metatasks_by_obtype[obtype] + vxens_metatasks_by_obtype[obtype]
-        all_metatasks_by_obtype[obtype] \
-          = obs_metatasks_by_obtype[obtype] + vx_metatasks_by_obtype[obtype]
+#
+# -----------------------------------------------------------------------
+#
+# Loop through all possible obs types and, for each one:
+#
+# 1) Find the list of field groups for that obs type that should be
+#    processed (i.e. are listed in VX_FIELD_GROUPS).
+#
+# 2) If this list is empty, do not include any of the (meta)tasks for
+#    that obs type in the list of (meta)tasks to run.  Otherwise, include
+#    in the list of (metatasks) to run the ones in only those categories
+#    for which the RUN_<categ> flag is set to True.
+#
+# -----------------------------------------------------------------------
+#
+    getobs_metatasks_to_run_by_obtype = {}
+    obspre_metatasks_to_run_by_obtype = {}
+    fcstpre_metatasks_to_run_by_obtype = {}
+    vxdet_metatasks_to_run_by_obtype = {}
+    vxens_metatasks_to_run_by_obtype = {}
+    vxtc_metatasks_to_run_by_obtype = {}
+    mode_metatasks_to_run_by_obtype = {}
+    all_metatasks_to_run_by_obtype = {}
 
+    for obtype, field_groups_crnt_obtype in field_groups_by_obtype.items():
+#
+# From the list of field groups for the current obs type, select only those
+# that are also specified in the workflow config file, i.e. specified by
+# the user in VX_FIELD_GROUPS (the remainder must be excluded because they
+# are not specified for processing).
+#
+        field_groups_to_process_crnt_obtype \
+          = list(set(field_groups_to_process) & set(field_groups_crnt_obtype))
+#
+# If there are field groups to process for the current obs type, then, 
+# for each task category:
+#
+# - If the RUN_... flag for that category (e.g. RUN_GETOBS for the obs
+#   retrieval category) is set to True, set the list of (meta)tasks to
+#   run for the obs type to the complete list of (meta)tasks for that obs
+#   type.
+#
+# - If the RUN_... flag is set to False, set the list of (meta)tasks to
+#   run for the obs type to an empty list.
+#
+        getobs_metatasks_to_run_by_obtype[obtype] = []
+        obspre_metatasks_to_run_by_obtype[obtype] = []
+        fcstpre_metatasks_to_run_by_obtype[obtype] = []
+        vxdet_metatasks_to_run_by_obtype[obtype] = []
+        vxens_metatasks_to_run_by_obtype[obtype] = []
+        vxtc_metatasks_to_run_by_obtype[obtype] = []
+        mode_metatasks_to_run_by_obtype[obtype] = []
+
+        if field_groups_to_process_crnt_obtype:
+            if run_getobs:
+                getobs_metatasks_to_run_by_obtype[obtype] = getobs_metatasks_by_obtype[obtype]
+            if run_obspre:
+                obspre_metatasks_to_run_by_obtype[obtype] = obspre_metatasks_by_obtype[obtype]
+            if run_fcstpre:
+                fcstpre_metatasks_to_run_by_obtype[obtype] = fcstpre_metatasks_by_obtype[obtype]
+            if run_vxdet:
+                vxdet_metatasks_to_run_by_obtype[obtype] = vxdet_metatasks_by_obtype[obtype]
+            if run_vxens:
+                vxens_metatasks_to_run_by_obtype[obtype] = vxens_metatasks_by_obtype[obtype]
+            if run_vxtc:
+                vxtc_metatasks_to_run_by_obtype[obtype] = vxens_metatasks_by_obtype[obtype]
+            if run_mode:
+                mode_metatasks_to_run_by_obtype[obtype] = vxens_metatasks_by_obtype[obtype]
+#
+# Collect all the (meta)tasks to run for the current obs type into a single
+# list.
+#
+        all_metatasks_to_run_by_obtype[obtype] \
+          = getobs_metatasks_to_run_by_obtype[obtype] \
+          + obspre_metatasks_to_run_by_obtype[obtype] \
+          + fcstpre_metatasks_to_run_by_obtype[obtype] \
+          + vxdet_metatasks_to_run_by_obtype[obtype] \
+          + vxens_metatasks_to_run_by_obtype[obtype] \
+          + vxtc_metatasks_to_run_by_obtype[obtype] \
+          + mode_metatasks_to_run_by_obtype[obtype]
+
+    print(f'')
+    print(f'{getobs_metatasks_to_run_by_obtype = }')
+    print(f'')
+    print(f'{obspre_metatasks_to_run_by_obtype = }')
+    print(f'')
+    print(f'{fcstpre_metatasks_to_run_by_obtype = }')
+    print(f'')
+    print(f'{vxdet_metatasks_to_run_by_obtype = }')
+    print(f'')
+    print(f'{vxens_metatasks_to_run_by_obtype = }')
+    print(f'')
+    print(f'{vxtc_metatasks_to_run_by_obtype = }')
+    print(f'')
+    print(f'{mode_metatasks_to_run_by_obtype = }')
+    print(f'')
+    print(f'{all_metatasks_to_run_by_obtype = }')
+
+
+# Collect all (meta)tasks to be run (i.e. from all obs type) into a single
+# list.  Then remove duplicates.
+    all_metatasks_to_run = [
+        mt for obtype in obtypes_all for mt in all_metatasks_to_run_by_obtype[obtype]
+    ]
+
+    print(f'')
+    print(f'all_metatasks_to_run (BEFORE removing duplicates):')
+    for metatask in all_metatasks_to_run:
+        print(f'    {metatask}')
+
+    all_metatasks_to_run = list(dict.fromkeys(all_metatasks_to_run))
+    print(f'')
+    print(f'all_metatasks_to_run (AFTER removing duplicates):')
+    for metatask in all_metatasks_to_run:
+        print(f'    {metatask}')
+
+#    lkjlkjlkjlkj
+#
+# -----------------------------------------------------------------------
+#
+#
+# -----------------------------------------------------------------------
+#
     rocoto_tasks = list(rocoto_config["tasks"])
     msg = dedent(
         f"""
@@ -665,104 +912,6 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
         msg = f'    ' + metatask
         logging.info(msg)
 
-    # Get flag that specifies whether to keep only the get_obs_... tasks in
-    # the workflow.
-    obs_only = vx_config["OBS_ONLY"]
-
-    # If there are no field groups specified for verification, remove those
-    # tasks that are common to all observation types.
-    field_groups_to_process = vx_config["VX_FIELD_GROUPS"]
-    if not field_groups_to_process or obs_only:
-        metatask = "metatask_check_post_output_all_mems"
-        if not field_groups_to_process:
-            logging.info(
-                dedent(
-                    f"""
-                Removing verification (meta)task
-                    "{metatask}"
-                from workflow because VX_FIELD_GROUPS is empty (and thus there are no field
-                groups to verify that need this (meta)task)."""
-                )
-            )
-        elif obs_only:
-            logging.info(
-                dedent(
-                    f"""
-                Removing verification (meta)task
-                    "{metatask}"
-                from workflow because OBS_ONLY is set to True.""" 
-                )
-            )
-        rocoto_config["tasks"].pop(metatask)
-
-    # If for a given obs type none of its field groups are specified for
-    # verification in the workflow config file, remove all vx (meta)tasks
-    # for that obs type from the workflow.
-    all_metatasks_to_run_by_obtype = {}
-    for obtype, field_groups_crnt_obtype in field_groups_by_obtype.items():
-        # From the list of field groups for the current obs type, select only those
-        # that are also specified in the workflow config file (i.e. specified by
-        # the user in VX_FIELD_GROUPS) because the remainder are not requested.
-        field_groups_to_process_crnt_obtype \
-          = list(set(field_groups_to_process) & set(field_groups_crnt_obtype))
-        # For the current obs type, get the complete list of obs, vx, and combined
-        # (i.e. both obs and vx) (meta)tasks.
-        obs_metatasks_crnt_obtype = obs_metatasks_by_obtype[obtype]
-        vx_metatasks_crnt_obtype = vx_metatasks_by_obtype[obtype]
-        all_metatasks_crnt_obtype = all_metatasks_by_obtype[obtype]
-        # If there are field groups to process for the current obs type, then set
-        # the list of obs (meta)tasks to run for this obs type to the complete
-        # list of obs (meta)tasks for the obs type.  Then set the list of vx
-        # (meta)tasks to run for the obs type to either an empty list (if
-        # OBS_ONLY is True, meaning only obs (meta)tasks will be run) or to the
-        # complete list of vx (meta)tasks for the obs type (if OBS_ONLY is False).
-        if field_groups_to_process_crnt_obtype:
-            obs_metatasks_to_run_crnt_obtype = obs_metatasks_crnt_obtype
-            if obs_only:
-                if vx_metatasks_crnt_obtype:
-                    logging.info(
-                        dedent(
-                            f"""
-                        Will remove all verification (meta)tasks for observation type "{obtype}"
-                        from the workflow (but will keep all obs tasks, e.g. get_obs_...) because
-                        OBS_ONLY has been set to True.  The verification tasks to be removed are:
-                            {vx_metatasks_crnt_obtype}"""
-                        )
-                    )
-                vx_metatasks_to_run_crnt_obtype = []
-            else:
-                vx_metatasks_to_run_crnt_obtype = vx_metatasks_crnt_obtype
-        # If there are no field groups to process for the current obs type, then
-        # set the lists of obs and vx (meta)tasks to run for the obs type to empty
-        # lists.
-        else:
-            # Print out an informational message only if there actually are obs
-            # or vx (meta)tasks for the current obs type to exclude.
-            if obs_metatasks_crnt_obtype or vx_metatasks_crnt_obtype:
-                logging.info(
-                    dedent(
-                        f"""
-                    Will remove all observaton AND verification (meta)tasks for observation
-                    type "{obtype}" from the workflow because none of the field groups for 
-                    this observation type are in the list of field groups to be processed
-                    (VX_FIELD_GROUPS).  The observation tasks to be removed are:
-                        {obs_metatasks_crnt_obtype}
-                    The verification tasks to be removed are:
-                        {vx_metatasks_crnt_obtype}"""
-                    )
-                )
-            obs_metatasks_to_run_crnt_obtype = []
-            vx_metatasks_to_run_crnt_obtype = []
-
-        all_metatasks_to_run_crnt_obtype \
-          = obs_metatasks_to_run_crnt_obtype + vx_metatasks_to_run_crnt_obtype
-
-        all_metatasks_to_run_by_obtype[obtype] = all_metatasks_to_run_crnt_obtype
-
-    # Collect all (meta)tasks to be run (i.e. from each obs type) into a single list.
-    all_metatasks_to_run = [
-        mt for obtype in obtypes_all for mt in all_metatasks_to_run_by_obtype[obtype]
-    ]
     # Remove all (meta)tasks in rocoto_config that are not also in all_metatasks_to_run.
     rocoto_tasks = list(rocoto_config["tasks"])
     for metatask in rocoto_tasks:
@@ -772,8 +921,7 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
                     f"""
                 Removing verification (meta)task
                     "{metatask}"
-                from workflow since either no field groups in VX_FIELD_GROUPS need this
-                (meta)task for verification or because OBS_ONLY is set to True (or both)."""
+                from workflow."""
                 )
             )
             rocoto_config["tasks"].pop(metatask)
@@ -807,6 +955,7 @@ def setup(ushdir, user_config_fn="config.yaml", debug: bool = False):
     for metatask in rocoto_tasks:
         msg = f'    ' + metatask
         logging.info(msg)
+#    jliiillllljjjjj
     #
     # -----------------------------------------------------------------------
     #
