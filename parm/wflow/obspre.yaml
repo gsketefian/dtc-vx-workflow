@@ -41,14 +41,31 @@ task_run_MET_Pb2nc_obs_NDAS:
     and:
       datadep:
         value: "&NDAS_OBS_DIR;"
-      or:
-        not:
-          taskvalid:
-            attrs:
-              task: get_obs_ndas
-        taskdep:
-          attrs:
-            task: get_obs_ndas
+# I cannot remember why we switched to using flag files to indicate task
+# completion from using "taskdep" (which just checks whether the task is
+# complete).  But we did that for other obspre tasks, so we should do it
+# for this task as well.
+#      or:
+#        not:
+#          taskvalid:
+#            attrs:
+#              task: get_obs_ndas
+#        taskdep:
+#          attrs:
+#            task: get_obs_ndas
+      # Check that the flag files that indicate that the get_obs_ndas tasks
+      # are complete are all present before launching any Pb2nc tasks.
+      sh_ndas_obs_available:
+        attrs:
+          shell: /bin/bash
+        command: '{% if verification.RUN_GETOBS %}
+                      &USHdir;/check_flag_file_presence.sh
+                        "{{workflow.WFLOW_FLAG_FILES_DIR}}"
+                        "get_obs_ndas_*_complete.txt"
+                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[0] }}"
+                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[-1] }}"
+                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|length }}" > &USHdir;/log.check_flag_file_NDAStxt
+                  {% else %}true{% endif %}'
 
 metatask_ASCII2nc_obs:
   var:
@@ -140,16 +157,18 @@ metatask_PcpCombine_APCP_all_accums_obs_CCPA:
         datadep:
           value: "&CCPA_OBS_DIR;"
         # Check that the flag files that indicate that the get_obs_ccpa tasks
-        # are complete are all present before launching any PcpCombine task.
+        # are complete are all present before launching any PcpCombine tasks.
         sh_ccpa_obs_available:
           attrs:
             shell: /bin/bash
-          command: '&USHdir;/check_flag_file_presence.sh
-                        "{{workflow.WFLOW_FLAG_FILES_DIR}}"
-                        "get_obs_ccpa_*_complete.txt"
-                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[0] }}"
-                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[-1] }}"
-                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|length }}"'
+          command: '{% if verification.RUN_GETOBS %}
+                        &USHdir;/check_flag_file_presence.sh
+                          "{{workflow.WFLOW_FLAG_FILES_DIR}}"
+                          "get_obs_ccpa_*_complete.txt"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[0] }}"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[-1] }}"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|length }}" > &USHdir;/log.check_flag_file_CCPA.txt
+                    {% else %}true{% endif %}'
 
 metatask_PcpCombine_ASNOW_all_accums_obs_NOHRSC:
   var:
@@ -175,14 +194,16 @@ metatask_PcpCombine_ASNOW_all_accums_obs_NOHRSC:
         datadep:
           value: "&NOHRSC_OBS_DIR;"
         # Check that the flag files that indicate that the get_obs_nohrsc tasks
-        # are complete are all present before launching any PcpCombine task.
+        # are complete are all present before launching any PcpCombine tasks.
         sh_nohrsc_obs_available:
           attrs:
             shell: /bin/bash
-          command: '&USHdir;/check_flag_file_presence.sh
-                        "{{workflow.WFLOW_FLAG_FILES_DIR}}"
-                        "get_obs_nohrsc_*_complete.txt"
-                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[0] }}"
-                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[-1] }}"
-                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|length }}"'
+          command: '{% if verification.RUN_GETOBS %}
+                        &USHdir;/check_flag_file_presence.sh
+                          "{{workflow.WFLOW_FLAG_FILES_DIR}}"
+                          "get_obs_nohrsc_*_complete.txt"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[0] }}"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[-1] }}"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|length }}" > &USHdir;/log.check_flag_file_NOHRSC.txt
+                    {% else %}true{% endif %}'
 
