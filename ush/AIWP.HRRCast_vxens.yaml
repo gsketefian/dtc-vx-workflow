@@ -65,8 +65,8 @@ verification:
 ensemble:
 #  DO_ENSEMBLE: False
   DO_ENSEMBLE: True
-#  NUM_ENS_MEMBERS: 10
   NUM_ENS_MEMBERS: 3
+#  NUM_ENS_MEMBERS: 10
   ENSMEM_INDX_MIN: 0
   ENSMEM_NAMES: '{% for m in range(ensemble.ENSINDX_MIN, ensemble.ENSINDX_MAX+1) %}{{ "m%02d, " % m }}{% endfor %}'
 
@@ -77,3 +77,18 @@ verification_resources:
         walltime: 02:00:00
       pointstat:
         walltime: 02:00:00
+    ensemble:
+      genensprod:
+        default:
+          walltime: 08:00:00
+        ndas:
+          walltime: 08:00:00
+      ensemblestat:
+        # Applies to all EnsembleStat tasks.
+        walltime: 08:00:00
+      gridstat:
+        # Applies to all GridStat_..._ens[mean|prob] tasks.
+        walltime: 08:00:00
+      pointstat:
+        walltime: 08:00:00
+
