@@ -62,9 +62,9 @@ task_run_MET_Pb2nc_obs_NDAS:
                       &USHdir;/check_flag_file_presence.sh
                         "{{workflow.WFLOW_FLAG_FILES_DIR}}"
                         "get_obs_ndas_*_complete.txt"
-                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[0] }}"
-                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[-1] }}"
-                        "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|length }}" > &USHdir;/log.check_flag_file_NDAStxt
+                        "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[0] }}"
+                        "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[-1] }}"
+                        "{{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}" > &USHdir;/log.check_flag_file_NDAS.txt
                   {% else %}true{% endif %}'
 
 metatask_ASCII2nc_obs:
@@ -118,6 +118,11 @@ task_run_MET_Point2Grid_obs_GOESAOD:
         value: '&GOESADP_OBS_DIR;'
       # Check that the flag files that indicate that the get_obs_ccpa tasks
       # are complete are all present before launching any PcpCombine task.
+      #
+      # Need to change the following "command:" entries to call check_flag_file_presence.sh,
+      # and pass OBS_DAYS_ALL_CYCLES_INIT in the call instead of OBS_DAYS_ALL_CYCLES_CUMUL
+      # because GOESAOD is an instantaneous field/observation, not a cumulative one.
+      #
       sh_goesaod_obs_available:
         attrs:
           shell: /bin/bash
