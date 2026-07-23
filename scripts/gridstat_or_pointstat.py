@@ -105,6 +105,7 @@ def gridstat_or_pointstat(config_file,cdate,obs_dir,field_group,obtype,accum_hh,
             "FIELD_GROUP": field_group,
             "ACCUM_HH": f"{accum_hh:02}",
             "ensmem_name": f"mem{str(ensmem_index).zfill(vxcfg['VX_NDIGITS_ENSMEM_NAMES'])}",
+            "ensmem_indx": f"{str(ensmem_index).zfill(vxcfg['VX_NDIGITS_ENSMEM_NAMES'])}",
             "time_lag": time_lag,
               }
 

@@ -8,6 +8,7 @@ user:
   ACCOUNT: zrtrr
 
 workflow:
+#  EXPT_SUBDIR: AIWP.HRRCast.test
   EXPT_SUBDIR: AIWP.HRRCast
   PREEXISTING_DIR_METHOD: rename
 #
@@ -25,7 +26,7 @@ workflow:
   CRON_RELAUNCH_INTVL_MNTS: 1
 
 verification:
-  RUN_GETOBS: True
+#  RUN_GETOBS: True
   RUN_GETOBS: False
 #
   RUN_OBSPRE: True
@@ -42,19 +43,21 @@ verification:
 #
 #  VX_FIELD_GROUPS: [ "APCP", "ASNOW", "REFC", "RETOP", "SFC", "UPA" ]
 #  VX_APCP_ACCUMS_HRS: [ 1, 3, 6, 24 ]
-#  VX_FIELD_GROUPS: ["APCP", "REFC"]
-  VX_FIELD_GROUPS: [ "APCP" ]
-  VX_APCP_ACCUMS_HRS: [ 6, 24 ]
-#  VX_ASNOW_ACCUMS_HRS: [ 6, 24 ]
+  VX_FIELD_GROUPS: ["APCP", "REFC"]
+  VX_APCP_ACCUMS_HRS: [ 1, 3, 6, 24 ]
+#  VX_FIELD_GROUPS: [ "APCP" ]
+#  VX_APCP_ACCUMS_HRS: [ 6, 24 ]
 #
   CCPA_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data_AIWP/ccpa"
   NOHRSC_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data_AIWP/nohrsc"
   MRMS_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data_AIWP/mrms"
   NDAS_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data_AIWP/ndas"
 #
+  VX_NDIGITS_ENSMEM_NAMES: 2
   VX_FCST_INPUT_BASEDIR: '/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/model_output/HRRRCast-live'
   FCST_SUBDIR_TEMPLATE: '{init?fmt=%Y%m%d?shift=-${time_lag}}/{init?fmt=%H?shift=-${time_lag}}/grib2'
-  FCST_FN_TEMPLATE: 'hrrrcast.{{ "m$(printf %02d $((10#${ENSMEM_INDX})))" if ensemble.DO_ENSEMBLE else "m00" }}.t{init?fmt=%H?shift=-${time_lag}}z.pgrb2.f{lead?fmt=%HH?shift=${time_lag}}'
+  #FCST_FN_TEMPLATE: 'hrrrcast.{{ "m$(printf %02d $((10#${ENSMEM_INDX})))" if ensemble.DO_ENSEMBLE else "m00" }}.t{init?fmt=%H?shift=-${time_lag}}z.pgrb2.f{lead?fmt=%HH?shift=${time_lag}}'
+  FCST_FN_TEMPLATE: 'hrrrcast.{{ "m${ensmem_indx}" if ensemble.DO_ENSEMBLE else "m00" }}.t{init?fmt=%H?shift=-${time_lag}}z.pgrb2.f{lead?fmt=%HH?shift=${time_lag}}'
 #
 #  VX_MASK: ['CONUS', 'WEST', 'OR_WA_CA']
   VX_MASK: []
@@ -62,6 +65,7 @@ verification:
 ensemble:
 #  DO_ENSEMBLE: False
   DO_ENSEMBLE: True
+#  NUM_ENS_MEMBERS: 10
   NUM_ENS_MEMBERS: 3
   ENSMEM_INDX_MIN: 0
   ENSMEM_NAMES: '{% for m in range(ensemble.ENSINDX_MIN, ensemble.ENSINDX_MAX+1) %}{{ "m%02d, " % m }}{% endfor %}'
