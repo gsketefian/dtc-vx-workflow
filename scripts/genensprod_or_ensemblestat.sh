@@ -161,7 +161,7 @@ OBS_INPUT_FN_TEMPLATE=$( eval echo ${OBS_INPUT_FN_TEMPLATE} )
 # METplus configuration files.
 #
 FCST_INPUT_FN_TEMPLATE=""
-for (( i=0; i<${NUM_ENS_MEMBERS}; i++ )); do
+for (( i=${ENSMEM_INDX_MIN}; i<=${ENSMEM_INDX_MAX}; i++ )); do
 
   ensmem_indx=$(printf "%0${VX_NDIGITS_ENSMEM_NAMES}d" "$((i+1))")
   ensmem_name="mem${ensmem_indx}"
