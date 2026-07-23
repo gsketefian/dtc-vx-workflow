@@ -134,13 +134,26 @@ metatask_GenEnsProd_EnsembleStat_REFC_RETOP:
     walltime: "{{ verification_resources.execution.ensemble.ensemblestat.walltime }}"
     dependency:
       and:
-        sh_mrms_obs_available: &all_get_obs_mrms_complete
+        # Check that the flag files that indicate that the get_obs_mrms tasks
+        # are complete are all present before launching any EnsembleStat tasks.
+        sh_all_get_obs_mrms_complete: &all_get_obs_mrms_complete
           attrs:
             shell: /bin/bash
-          command: find {{ workflow.WFLOW_FLAG_FILES_DIR }} -name "get_obs_mrms_*_complete.txt" -exec basename {} \; 2>/dev/null |
-            grep -oE '[0-9]{8}' |
-            awk -F/ -v s={{ workflow.OBS_DAYS_ALL_CYCLES_INST[0] }} -v e={{ workflow.OBS_DAYS_ALL_CYCLES_INST[-1] }} '($NF >= s && $NF <= e)' |
-            test $(wc -l) -ge {{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}
+          command: '{% if verification.RUN_GETOBS %}
+                        &USHdir;/check_flag_file_presence.sh
+                          "{{workflow.WFLOW_FLAG_FILES_DIR}}"
+                          "get_obs_mrms_*_complete.txt"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[0] }}"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[-1] }}"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}" > &USHdir;/log.check_flag_file_MRMS.txt
+                    {% else %}true{% endif %}'
+#        sh_mrms_obs_available: &all_get_obs_mrms_complete
+#          attrs:
+#            shell: /bin/bash
+#          command: find {{ workflow.WFLOW_FLAG_FILES_DIR }} -name "get_obs_mrms_*_complete.txt" -exec basename {} \; 2>/dev/null |
+#            grep -oE '[0-9]{8}' |
+#            awk -F/ -v s={{ workflow.OBS_DAYS_ALL_CYCLES_INST[0] }} -v e={{ workflow.OBS_DAYS_ALL_CYCLES_INST[-1] }} '($NF >= s && $NF <= e)' |
+#            test $(wc -l) -ge {{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}
         taskdep_genensprod:
           attrs:
             task: run_MET_GenEnsProd_vx_#FIELD_GROUP#
@@ -174,14 +187,27 @@ metatask_GenEnsProd_EnsembleStat_SFC_UPA:
     dependency:
       and:
         # Check that the flag files that indicate that the Pb2NC tasks
-        # are complete are all present before launching any PcpCombine task.
-        sh_pb2nc_ndas_complete: &all_pb2nc_obs_ndas_complete
+        # are complete are all present before launching any EnsembleStat task.
+        sh_all_ndas_pb2nc_complete: &all_ndas_pb2nc_complete
           attrs:
             shell: /bin/bash
-          command: find {{ workflow.WFLOW_FLAG_FILES_DIR }} -name "NDAS_nc_obs_*_ready.txt" -exec basename {} \; 2>/dev/null |
-            grep -oE '[0-9]{8}' |
-            awk -F/ -v s={{ workflow.OBS_DAYS_ALL_CYCLES_INST[0] }} -v e={{ workflow.OBS_DAYS_ALL_CYCLES_INST[-1] }} '($NF >= s && $NF <= e)' |
-            test $(wc -l) -ge {{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}
+          command: '{% if verification.RUN_GETOBS %}
+                        &USHdir;/check_flag_file_presence.sh
+                          "{{workflow.WFLOW_FLAG_FILES_DIR}}"
+                          "NDAS_nc_obs_*_ready.txt"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[0] }}"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[-1] }}"
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}"
+                    {% else %}true{% endif %}'
+#        # Check that the flag files that indicate that the Pb2NC tasks
+#        # are complete are all present before launching any EnsembleStat task.
+#        sh_pb2nc_ndas_complete: &all_pb2nc_obs_ndas_complete
+#          attrs:
+#            shell: /bin/bash
+#          command: find {{ workflow.WFLOW_FLAG_FILES_DIR }} -name "NDAS_nc_obs_*_ready.txt" -exec basename {} \; 2>/dev/null |
+#            grep -oE '[0-9]{8}' |
+#            awk -F/ -v s={{ workflow.OBS_DAYS_ALL_CYCLES_INST[0] }} -v e={{ workflow.OBS_DAYS_ALL_CYCLES_INST[-1] }} '($NF >= s && $NF <= e)' |
+#            test $(wc -l) -ge {{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}
         taskdep_genensprod:
           attrs:
             task: run_MET_GenEnsProd_vx_#FIELD_GROUP#
@@ -291,8 +317,8 @@ metatask_PointStat_SFC_UPA_ensmeanprob:
       walltime: "{{ verification_resources.execution.ensemble.pointstat.walltime }}"
       dependency:
         and:
-          sh_all_pb2nc_obs_ndas_complete:
-            <<: *all_pb2nc_obs_ndas_complete
+          sh_all_ndas_pb2nc_complete:
+            <<: *all_ndas_pb2nc_complete
           taskdep_genensprod:
             attrs:
               task: run_MET_GenEnsProd_vx_#FIELD_GROUP#
