@@ -100,6 +100,9 @@ verification_resources:
       ensemblestat:
         # Applies to all EnsembleStat tasks.
         walltime: 08:00:00
+        # This is to avoid the Out of Memory (OOM) errors that EnsembleStat
+        # generates when operating on REFC (with the default value of 2G)
+        memory: 16G
       gridstat:
         # Applies to all GridStat_..._ens[mean|prob] tasks.
         walltime: 08:00:00
