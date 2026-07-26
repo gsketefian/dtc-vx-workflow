@@ -723,8 +723,10 @@ verification_resources:
           walltime: 04:45:00
         ndas:
           walltime: 02:30:00
+        memory: '2G'
       ensemblestat:
         walltime: 01:00:00
+        memory: '2G'
       gridstat:
         walltime: 01:00:00
       pointstat:

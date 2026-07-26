@@ -44,6 +44,7 @@ metatask_GenEnsProd_EnsembleStat_APCP_all_accums:
       FCST_THRESH: 'all'
       OMP_NUM_THREADS: 4
     walltime: "{{ verification_resources.execution.ensemble.genensprod.default.walltime }}"
+    memory: "{{ verification_resources.execution.ensemble.genensprod.memory }}"
     dependency:
       metataskdep_pcpcombine_fcst:
         attrs:
@@ -55,6 +56,7 @@ metatask_GenEnsProd_EnsembleStat_APCP_all_accums:
       METPLUSTOOLNAME: 'ENSEMBLESTAT'
       FCST_THRESH: 'none'
     walltime: "{{ verification_resources.execution.ensemble.ensemblestat.walltime }}"
+    memory: "{{ verification_resources.execution.ensemble.ensemblestat.memory }}"
     dependency:
       and:
         taskdep_pcpcombine_obs_ccpa: &taskdep_pcpcombine_obs_ccpa
@@ -81,6 +83,7 @@ metatask_GenEnsProd_EnsembleStat_ASNOW_all_accums:
       FCST_THRESH: 'all'
       OMP_NUM_THREADS: 4
     walltime: "{{ verification_resources.execution.ensemble.genensprod.default.walltime }}"
+    memory: "{{ verification_resources.execution.ensemble.genensprod.memory }}"
     dependency:
       and:
         metataskdep_pcpcombine_fcst:
@@ -93,6 +96,7 @@ metatask_GenEnsProd_EnsembleStat_ASNOW_all_accums:
       METPLUSTOOLNAME: 'ENSEMBLESTAT'
       FCST_THRESH: 'none'
     walltime: "{{ verification_resources.execution.ensemble.ensemblestat.walltime }}"
+    memory: "{{ verification_resources.execution.ensemble.ensemblestat.memory }}"
     dependency:
       and:
         taskdep_pcpcombine_obs_nohrsc: &taskdep_pcpcombine_obs_nohrsc
@@ -119,6 +123,7 @@ metatask_GenEnsProd_EnsembleStat_REFC_RETOP:
       FCST_THRESH: 'all'
       OMP_NUM_THREADS: 4
     walltime: "{{ verification_resources.execution.ensemble.genensprod.default.walltime }}"
+    memory: "{{ verification_resources.execution.ensemble.genensprod.memory }}"
     dependency:
       and:
         metataskdep_check_post_output: &check_post_output
@@ -132,6 +137,7 @@ metatask_GenEnsProd_EnsembleStat_REFC_RETOP:
       FCST_LEVEL: 'L0'
       FCST_THRESH: 'none'
     walltime: "{{ verification_resources.execution.ensemble.ensemblestat.walltime }}"
+    memory: "{{ verification_resources.execution.ensemble.ensemblestat.memory }}"
     dependency:
       and:
         # Check that the flag files that indicate that the get_obs_mrms tasks
@@ -175,6 +181,7 @@ metatask_GenEnsProd_EnsembleStat_SFC_UPA:
       FCST_THRESH: 'all'
       OMP_NUM_THREADS: 4
     walltime: "{{ verification_resources.execution.ensemble.genensprod.default.walltime }}"
+    memory: "{{ verification_resources.execution.ensemble.genensprod.memory }}"
     dependency:
       metataskdep_check_post_output:
          <<: *check_post_output
@@ -184,6 +191,7 @@ metatask_GenEnsProd_EnsembleStat_SFC_UPA:
       <<: *envars_GenEnsProd_NDAS
       METPLUSTOOLNAME: 'ENSEMBLESTAT'
     walltime: "{{ verification_resources.execution.ensemble.ensemblestat.walltime }}"
+    memory: "{{ verification_resources.execution.ensemble.ensemblestat.memory }}"
     dependency:
       and:
         # Check that the flag files that indicate that the Pb2NC tasks
