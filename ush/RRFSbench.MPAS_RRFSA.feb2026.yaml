@@ -49,11 +49,6 @@ verification:
   VX_APCP_ACCUMS_HRS: [ 1, 3, 6, 24 ]
   VX_ASNOW_ACCUMS_HRS: [ 6, 24 ]
 #
-#  CCPA_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/ccpa"
-#  NOHRSC_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/nohrsc"
-#  MRMS_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/mrms"
-#  NDAS_OBS_DIR: "{{ workflow.EXPTDIR }}/obs_data/ndas"
-#
   CCPA_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data/ccpa"
   NOHRSC_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data/nohrsc"
   MRMS_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data/mrms"
