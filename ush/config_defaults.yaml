@@ -531,7 +531,7 @@ ensemble:
   #-----------------------------------------------------------------------
   #
   DO_ENSEMBLE: False
-  NUM_ENS_MEMBERS: 0
+  NUM_ENS_MEMBERS: 1
   ENSMEM_INDX_MIN: 0
   ENSMEM_INDX_MAX: !int '{{ ensemble.ENSMEM_INDX_MIN + ensemble.NUM_ENS_MEMBERS - 1}}'
   ENSMEM_NAMES: '{% for m in range(ensemble.ENSMEM_INDX_MIN, ensemble.ENSMEM_INDX_MAX+1) %}{{ "mem%03d, " % m }}{% endfor %}'
