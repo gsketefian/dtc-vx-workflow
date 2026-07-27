@@ -54,7 +54,6 @@ verification:
   MRMS_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data_AIWP/mrms"
   NDAS_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data_AIWP/ndas"
 #
-  VX_NDIGITS_ENSMEM_NAMES: 2
   VX_FCST_INPUT_BASEDIR: '/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/model_output/HRRRCast-live'
   FCST_SUBDIR_TEMPLATE: '{init?fmt=%Y%m%d?shift=-${time_lag}}/{init?fmt=%H?shift=-${time_lag}}/grib2'
   #FCST_FN_TEMPLATE: 'hrrrcast.{{ "m$(printf %02d $((10#${ENSMEM_INDX})))" if ensemble.DO_ENSEMBLE else "m00" }}.t{init?fmt=%H?shift=-${time_lag}}z.pgrb2.f{lead?fmt=%HH?shift=${time_lag}}'
@@ -69,6 +68,7 @@ ensemble:
   NUM_ENS_MEMBERS: 3
   NUM_ENS_MEMBERS: 10
 #  ENSMEM_INDX_MIN: 0
+  VX_NDIGITS_ENSMEM_NAMES: 2
   ENSMEM_NAMES: '{% for m in range(ensemble.ENSINDX_MIN, ensemble.ENSINDX_MAX+1) %}{{ "m%02d, " % m }}{% endfor %}'
 #
   DO_NEP: True
