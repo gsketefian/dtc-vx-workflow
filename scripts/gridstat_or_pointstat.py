@@ -78,6 +78,7 @@ def gridstat_or_pointstat(config_file,cdate,obs_dir,field_group,obtype,accum_hh,
     # Set some aliases
     vxcfg = cfg["verification"]
     do_ens = cfg["ensemble"]["DO_ENSEMBLE"]
+    vx_ndigits_ensmem_names = cfg["ensemble"]["VX_NDIGITS_ENSMEM_NAMES"]
 
     # Check that basic input directories exist:
     if not Path(obs_dir).is_dir():
@@ -87,12 +88,12 @@ def gridstat_or_pointstat(config_file,cdate,obs_dir,field_group,obtype,accum_hh,
     # whether we are running GridStat or Pointstat (geom)
     geom, _, _, met_out_name, met_filedir_name = set_vx_params(obtype,field_group,accum_hh)
 
-    ensmem=f"mem{str(ensmem_index).zfill(vxcfg['VX_NDIGITS_ENSMEM_NAMES'])}"
+    ensmem=f"mem{str(ensmem_index).zfill(vx_ndigits_ensmem_names)}"
 
     # Set ensemble time lag settings
     lgr.debug(f"{cfg['ensemble']['ENS_TIME_LAG_HRS']=}")
     lgr.debug(f"{ensmem_index=}")
-    lgr.debug(f"{vxcfg['VX_NDIGITS_ENSMEM_NAMES']=}")
+    lgr.debug(f"{vx_ndigits_ensmem_names=}")
     time_lag = 0
     if do_ens:
         time_lag_hrs = ast.literal_eval(cfg['ensemble']['ENS_TIME_LAG_HRS'])[ensmem_index-1]
@@ -104,8 +105,8 @@ def gridstat_or_pointstat(config_file,cdate,obs_dir,field_group,obtype,accum_hh,
     subvars = {
             "FIELD_GROUP": field_group,
             "ACCUM_HH": f"{accum_hh:02}",
-            "ensmem_name": f"mem{str(ensmem_index).zfill(vxcfg['VX_NDIGITS_ENSMEM_NAMES'])}",
-            "ensmem_indx": f"{str(ensmem_index).zfill(vxcfg['VX_NDIGITS_ENSMEM_NAMES'])}",
+            "ensmem_name": f"mem{str(ensmem_index).zfill(vx_ndigits_ensmem_names)}",
+            "ensmem_indx": f"{str(ensmem_index).zfill(vx_ndigits_ensmem_names)}",
             "time_lag": time_lag,
               }
 
