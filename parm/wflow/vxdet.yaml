@@ -129,7 +129,7 @@ metatask_GridStat_REFC_RETOP_all_mems:
                             "get_obs_mrms_*_complete.txt"
                             "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[0] }}"
                             "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[-1] }}"
-                            "{{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}" > &USHdir;/log.check_flag_file_MRMS.txt
+                            "{{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}"
                       {% else %}true{% endif %}'
           datadep_post_files_exist:
             attrs:

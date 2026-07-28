@@ -64,7 +64,7 @@ task_run_MET_Pb2nc_obs_NDAS:
                         "get_obs_ndas_*_complete.txt"
                         "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[0] }}"
                         "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[-1] }}"
-                        "{{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}" > &USHdir;/log.check_flag_file_NDAS.txt
+                        "{{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}"
                   {% else %}true{% endif %}'
 
 metatask_ASCII2nc_obs:
@@ -172,7 +172,7 @@ metatask_PcpCombine_APCP_all_accums_obs_CCPA:
                           "get_obs_ccpa_*_complete.txt"
                           "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[0] }}"
                           "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[-1] }}"
-                          "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|length }}" > &USHdir;/log.check_flag_file_CCPA.txt
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|length }}"
                     {% else %}true{% endif %}'
 
 metatask_PcpCombine_ASNOW_all_accums_obs_NOHRSC:
@@ -209,6 +209,6 @@ metatask_PcpCombine_ASNOW_all_accums_obs_NOHRSC:
                           "get_obs_nohrsc_*_complete.txt"
                           "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[0] }}"
                           "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL[-1] }}"
-                          "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|length }}" > &USHdir;/log.check_flag_file_NOHRSC.txt
+                          "{{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|length }}"
                     {% else %}true{% endif %}'
 
