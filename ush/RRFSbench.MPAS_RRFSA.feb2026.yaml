@@ -11,11 +11,11 @@ workflow:
   EXPT_SUBDIR: RRFSbench.MPAS_RRFSA.feb2026
   PREEXISTING_DIR_METHOD: rename
 #
-  DATE_FIRST_CYCL: '2026020400'
-  DATE_LAST_CYCL: '2026020612'
+  DATE_FIRST_CYCL: '2026020100'
+  DATE_LAST_CYCL: '2026020200'
   INCR_CYCL_FREQ: 12
+#  FCST_LEN_HRS: 6
   FCST_LEN_HRS: 60
-#  FCST_LEN_HRS: 48
 #
 #  DATE_FIRST_CYCL: '2026020100'
 #  DATE_LAST_CYCL: '2026022812'
@@ -45,7 +45,8 @@ verification:
   RUN_VXTC: False
   RUN_MODE: False 
 #
-  VX_FIELD_GROUPS: [ "APCP", "ASNOW", "REFC", "RETOP", "SFC", "UPA" ]
+#  VX_FIELD_GROUPS: [ "APCP", "ASNOW", "REFC", "RETOP", "SFC", "UPA" ]
+  VX_FIELD_GROUPS: [ "APCP", "ASNOW", "REFC", "SFC", "UPA" ]
   VX_APCP_ACCUMS_HRS: [ 1, 3, 6, 24 ]
   VX_ASNOW_ACCUMS_HRS: [ 6, 24 ]
 #
@@ -54,16 +55,20 @@ verification:
   MRMS_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data/mrms"
   NDAS_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data/ndas"
 #
+  VX_FCST_MODEL_NAME: 'MPASRRFSA'
   VX_FCST_INPUT_BASEDIR: '/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/model_output/MPAS_RRFSA.untarred_deaccumulated.ASNOW_roundoff_8e-5'
   FCST_SUBDIR_TEMPLATE: '{init?fmt=%Y%m%d?shift=-${time_lag}}/{init?fmt=%Y%m%d%H?shift=-${time_lag}}{{ "/${ensmem_name}" if ensemble.DO_ENSEMBLE }}'
   FCST_FN_TEMPLATE: 'mpas_rrfsa_{init?fmt=%Y%m%d%H?shift=-${time_lag}}_f{lead?fmt=%HH?shift=${time_lag}}.grib2'
+  #FCST_FN_TEMPLATE_PCPCOMBINE_OUTPUT: 'srw.t{init?fmt=%H}z.prslev.{{ verification.VX_FCST_MODEL_NAME }}.${FIELD_GROUP}${ACCUM_HH}h.{valid?fmt=%Y%m%d%H?shift=-${ACCUM_HH}H}_to_{valid?fmt=%Y%m%d%H}.nc'
+  FCST_FN_TEMPLATE_PCPCOMBINE_OUTPUT: '{{ verification.VX_FCST_MODEL_NAME }}.t{init?fmt=%H}z.prslev.${FIELD_GROUP}${ACCUM_HH}h.{valid?fmt=%Y%m%d%H?shift=-${ACCUM_HH}H}_to_{valid?fmt=%Y%m%d%H}.nc'
 #
-  VX_MASK: ['CONUS', 'WEST', 'OR_WA_CA']
+#  VX_MASK: ['CONUS', 'WEST', 'OR_WA_CA']
+  VX_MASK: ['CONUS', 'WEST', 'EAST', 'OR_WA_CA']
 
 verification_resources:
   execution:
     deterministic:
       gridstat:
-        walltime: 02:00:00
+        walltime: 03:00:00
       pointstat:
-        walltime: 02:00:00
+        walltime: 03:00:00
