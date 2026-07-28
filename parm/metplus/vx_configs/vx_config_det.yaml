@@ -97,10 +97,16 @@ ASNOW:
         #        8.0           20.32        0.2032 
         #       12.0           30.48        0.3048 
         #
-        # These assume that ASNOW (in both the obs and forecast)
-        # is given in units of cm.
-        A6: ['gt0.0', 'ge2.54', 'ge5.08', 'ge10.16', 'ge20.32']
-        A24: ['gt0.0', 'ge2.54', 'ge10.16', 'ge20.32', 'ge30.48']
+        # Choose one of the following sets of values depending on whether the
+        # units of ASNOW in the obs and forecasts are in centimeters or meters.
+        #
+        # These assume that ASNOW in the obs and forecasts is given in units of cm.
+        #A6: ['gt0.0', 'ge2.54', 'ge5.08', 'ge10.16', 'ge20.32']
+        #A24: ['gt0.0', 'ge2.54', 'ge10.16', 'ge20.32', 'ge30.48']
+        #
+        # These assume that ASNOW in the obs and forecasts is given in units of meters.
+        A6:  ['gt0.0', 'ge0.00254', 'ge0.0254', 'ge0.0508', 'ge0.1016', 'ge0.2032']
+        A24: ['gt0.0', 'ge0.00254', 'ge0.0254', 'ge0.0508', 'ge0.1016', 'ge0.2032', 'ge0.3048']
 REFC:
     REFC%%MergedReflectivityQCComposite:
         L0%%Z500: ['ge20', 'ge30', 'ge40', 'ge50']
