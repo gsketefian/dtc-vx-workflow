@@ -141,7 +141,14 @@ metatask_GenEnsProd_EnsembleStat_REFC_RETOP:
     dependency:
       and:
         # Check that the flag files that indicate that the get_obs_mrms tasks
-        # are complete are all present before launching any EnsembleStat tasks.
+        # are complete are all present before launching any EnsembleStat tasks
+        # that need MRMS obs.
+        #
+        # Note that we need to wait until all the get_obs_mrms tasks are complete
+        # because if the forecasts happen to be longer than 24 hours, a single
+        # EnsembleStat task (corresponding to a given forecast init time) will
+        # require more than one day's worth of MRMS obs.
+        #
         sh_all_get_obs_mrms_complete: &all_get_obs_mrms_complete
           attrs:
             shell: /bin/bash
@@ -194,8 +201,19 @@ metatask_GenEnsProd_EnsembleStat_SFC_UPA:
     memory: "{{ verification_resources.execution.ensemble.ensemblestat.memory }}"
     dependency:
       and:
-        # Check that the flag files that indicate that the Pb2NC tasks
-        # are complete are all present before launching any EnsembleStat task.
+        #
+        # Check that the flag files that indicate that the Pb2nc tasks (which
+        # are obs-day-based and convert a given obs day's NDAS obs from prepbufr
+        # to netcdf format) are complete are ALL present before launching any
+        # EnsembleStat tasks (which are init based) that need NDAS obs (in
+        # netcdf format).
+        #
+        # Note that we need to wait until all the NDAS obs are converted to 
+        # netcdf format (i.e. for all obs days) because if the forecasts happen
+        # to be longer than 24 hours, a single EnsembleStat task (corresponding
+        # to a given forecast init time) will require more than one day's worth
+        # of NDAS netcdf-format obs.
+        #
         sh_all_ndas_pb2nc_complete: &all_ndas_pb2nc_complete
           attrs:
             shell: /bin/bash

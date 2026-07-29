@@ -125,8 +125,8 @@ metatask_GridStat_REFC_RETOP_all_mems:
           #
           # Note that we wait until the MRMS files are available for ALL obs days
           # because if the forecasts happen to be longer than 24 hours, a single
-          # GridStat task (corresponding to a given init time) will require more
-          # than one day's worth of MRMS obs.
+          # GridStat task (corresponding to a given forecast init time) will
+          # require more than one day's worth of MRMS obs.
           #
           sh_mrms_obs_available:
             attrs:
