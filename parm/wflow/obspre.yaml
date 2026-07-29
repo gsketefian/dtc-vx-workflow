@@ -123,6 +123,23 @@ task_run_MET_Point2Grid_obs_GOESAOD:
       # and pass OBS_DAYS_ALL_CYCLES_INIT in the call instead of OBS_DAYS_ALL_CYCLES_CUMUL
       # because GOESAOD is an instantaneous field/observation, not a cumulative one.
       #
+      # QUESTIONS/COMMENTS:
+      #
+      # 1) Do the Point2Grid_obs tasks operate on obs days or cycles?
+      #
+      #    If on obs days, then we only need to check that the corresponding tasks
+      #    are complete.  In that case, we only need a single task dependency below.
+      #
+      #    If they operate on cycles, then the get_obs_goesaod and get_obs_goesadp
+      #    tasks must be complete for all obs days, so we would need a shell script
+      #    dependency below that calls check_flag_file_presence.sh to check the 
+      #    presence of all flag files from the get_obs_goesaod and get_obs_goesadp
+      #    tasks.
+      #
+      # 2) In the existing code below, we probably need to change OBS_DAYS_ALL_CYCLES_CUMUL
+      #    to OBS_DAYS_ALL_CYCLES_INIT because GOESAOD and GOESADP are instantaneous obs
+      #    (as opposed to cumulative like CCPA and NOHRSC).
+      #
       sh_goesaod_obs_available:
         attrs:
           shell: /bin/bash
@@ -161,8 +178,16 @@ metatask_PcpCombine_APCP_all_accums_obs_CCPA:
       and:
         datadep:
           value: "&CCPA_OBS_DIR;"
-        # Check that the flag files that indicate that the get_obs_ccpa tasks
-        # are complete are all present before launching any PcpCombine tasks.
+        #
+        # Check that the flag files that indicate that the get_obs_ccpa tasks are
+        # complete are ALL present before launching any PcpCombine tasks that need
+        # CCPA obs.
+        #
+        # Note that we wait until the CCPA files are available for ALL obs days
+        # because if the forecasts happen to be longer than 24 hours, a single
+        # PcpCombine task (corresponding to a given init time) will require more
+        # than one day's worth of CCPA obs.
+        #
         sh_ccpa_obs_available:
           attrs:
             shell: /bin/bash
@@ -198,8 +223,16 @@ metatask_PcpCombine_ASNOW_all_accums_obs_NOHRSC:
       and:
         datadep:
           value: "&NOHRSC_OBS_DIR;"
-        # Check that the flag files that indicate that the get_obs_nohrsc tasks
-        # are complete are all present before launching any PcpCombine tasks.
+        #
+        # Check that the flag files that indicate that the get_obs_nohrsc tasks are
+        # complete are ALL present before launching any PcpCombine tasks that need
+        # NOHRSC obs.
+        #
+        # Note that we wait until the NOHRSC files are available for ALL obs days
+        # because if the forecasts happen to be longer than 24 hours, a single
+        # PcpCombine task (corresponding to a given init time) will require more
+        # than one day's worth of NOHRSC obs.
+        #
         sh_nohrsc_obs_available:
           attrs:
             shell: /bin/bash
