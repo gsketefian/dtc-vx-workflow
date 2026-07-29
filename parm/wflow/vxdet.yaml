@@ -192,7 +192,7 @@ default_metatask_PointStat: &default_metatask_PointStat
                             "#METAOBTYPE#_nc_obs_*_ready.txt"
                             "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[0] }}"
                             "{{ workflow.OBS_DAYS_ALL_CYCLES_INST[-1] }}"
-                            "{{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}" > &USHdir;/log.sh_pb2nc_complete_@Y@m@d@H.txt
+                            "{{ workflow.OBS_DAYS_ALL_CYCLES_INST|length }}"
                       {% else %}true{% endif %}'
           datadep_post_files_exist:
             attrs:
