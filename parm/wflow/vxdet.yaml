@@ -118,8 +118,16 @@ metatask_GridStat_REFC_RETOP_all_mems:
       walltime: "{{ verification_resources.execution.deterministic.gridstat.walltime }}"
       dependency:
         and:
-          # Check that the flag files that indicate that the get_obs_mrms tasks
-          # are complete are all present before launching any GridStat tasks.
+          #
+          # Check that the flag files that indicate that the get_obs_mrms tasks are
+          # complete are ALL present before launching any GridStat tasks that need
+          # MRMS obs.
+          #
+          # Note that we wait until the MRMS files are available for ALL obs days
+          # because if the forecasts happen to be longer than 24 hours, a single
+          # GridStat task (corresponding to a given init time) will require more
+          # than one day's worth of MRMS obs.
+          #
           sh_mrms_obs_available:
             attrs:
               shell: /bin/bash
