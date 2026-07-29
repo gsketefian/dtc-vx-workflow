@@ -7,6 +7,9 @@ user:
 #  ACCOUNT: fv3lam
   ACCOUNT: zrtrr
 
+platform:
+  TASKTHROTTLE: 350
+
 workflow:
   EXPT_SUBDIR: RRFSbench.RRFSv1.feb2026
   PREEXISTING_DIR_METHOD: rename
@@ -22,11 +25,6 @@ workflow:
 #  INCR_CYCL_FREQ: 12
 #  FCST_LEN_HRS: 84
 #
-#  taskgroups:
-#  - parm/wflow/getobs.yaml
-#  - parm/wflow/obspre.yaml
-#  - parm/wflow/obsfcst.yaml
-#  - parm/wflow/verify_ens.yaml
   USE_CRON_TO_RELAUNCH: true
   CRON_RELAUNCH_INTVL_MNTS: 1
 
