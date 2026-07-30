@@ -8,21 +8,21 @@ user:
   ACCOUNT: rtrr
 #  ACCOUNT: zrtrr
 
+platform:
+  TASKTHROTTLE: 350
+
 workflow:
-#  EXPT_SUBDIR: AIWP.HRRCast.test
-  EXPT_SUBDIR: AIWP.HRRCast
-  PREEXISTING_DIR_METHOD: rename
 #
   DATE_FIRST_CYCL: '2026040100'
-  DATE_LAST_CYCL: '2026040100'
+  DATE_LAST_CYCL:  '2026040100'
+#
   INCR_CYCL_FREQ: 24
   FCST_LEN_HRS: 24
 #
-#  taskgroups:
-#  - parm/wflow/getobs.yaml
-#  - parm/wflow/obspre.yaml
-#  - parm/wflow/obsfcst.yaml
-#  - parm/wflow/verify_ens.yaml
+  EXPT_SUBDIR: AIWP.HRRCast
+#  EXPT_SUBDIR: "AIWP.{{verification.VX_FCST_MODEL_NAME}}.DO_NEP_{{ensemble.DO_NEP}}.DO_NMEP_{{ensemble.DO_NMEP}}.fcstlen_{{'%02d' % workflow.FCST_LEN_HRS}}hrs.{{workflow.DATE_FIRST_CYCL}}_to_{{workflow.DATE_LAST_CYCL}}"
+  PREEXISTING_DIR_METHOD: rename
+#
   USE_CRON_TO_RELAUNCH: true
   CRON_RELAUNCH_INTVL_MNTS: 1
 
@@ -54,13 +54,14 @@ verification:
   MRMS_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data_AIWP/mrms"
   NDAS_OBS_DIR: "/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/obs_data_AIWP/ndas"
 #
+  VX_FCST_MODEL_NAME: 'HRRRCast'
   VX_FCST_INPUT_BASEDIR: '/scratch4/BMC/fv3lam/Gerard.Ketefian/DTC_RRFSbench/model_output/HRRRCast-live'
   FCST_SUBDIR_TEMPLATE: '{init?fmt=%Y%m%d?shift=-${time_lag}}/{init?fmt=%H?shift=-${time_lag}}/grib2'
   #FCST_FN_TEMPLATE: 'hrrrcast.{{ "m$(printf %02d $((10#${ENSMEM_INDX})))" if ensemble.DO_ENSEMBLE else "m00" }}.t{init?fmt=%H?shift=-${time_lag}}z.pgrb2.f{lead?fmt=%HH?shift=${time_lag}}'
   FCST_FN_TEMPLATE: 'hrrrcast.{{ "m${ensmem_indx}" if ensemble.DO_ENSEMBLE else "m00" }}.t{init?fmt=%H?shift=-${time_lag}}z.pgrb2.f{lead?fmt=%HH?shift=${time_lag}}'
 #
 #  VX_MASK: ['CONUS', 'WEST', 'OR_WA_CA']
-  VX_MASK: []
+  VX_MASK: ['CONUS']
 
 ensemble:
 #  DO_ENSEMBLE: False
@@ -74,7 +75,9 @@ ensemble:
   DO_NEP: True
   DO_NMEP: True
 #  NBRHD_PROB_SHAPE: 'CIRCLE'
-#  NBRHD_PROB_WIDTHS: [15, 27]
+#  These are to match Vanderlei's runs.  Not sure if we need all of them 
+#  in a final run.
+  NBRHD_PROB_WIDTHS: [3, 5, 9, 19, 27]
 #  NBRHD_PROB_VLD_THRESH: 0.0
 ##
 #  NMEP_SMOOTH_METHOD: 'GAUSSIAN'
