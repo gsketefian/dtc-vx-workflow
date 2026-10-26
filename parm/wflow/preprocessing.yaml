@@ -134,14 +134,14 @@ task_run_MET_Point2Grid_GOESAOD:
         command: '&USHdir;/check_flag_file_presence.sh
           "{{ workflow.WFLOW_FLAG_FILES_DIR }}"
           "get_obs_goesaod_*_complete.txt"
-          {{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|join(" ") }}'
+          {{ workflow.OBS_DAYS_ALL_CYCLES_INST|join(" ") }}'
       sh_goesadp_obs_available:
         attrs:
           shell: /bin/bash
         command: '&USHdir;/check_flag_file_presence.sh
           "{{ workflow.WFLOW_FLAG_FILES_DIR }}"
           "get_obs_goesadp_*_complete.txt"
-          {{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|join(" ") }}'
+          {{ workflow.OBS_DAYS_ALL_CYCLES_INST|join(" ") }}'
 
 metatask_PcpCombine_APCP_all_accums_obs_CCPA:
   var:

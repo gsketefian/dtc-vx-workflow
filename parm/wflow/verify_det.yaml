@@ -123,7 +123,7 @@ metatask_GridStat_REFC_RETOP_all_mems:
             command: '&USHdir;/check_flag_file_presence.sh
               "{{ workflow.WFLOW_FLAG_FILES_DIR }}"
               "get_obs_mrms_*_complete.txt"
-              {{ workflow.OBS_DAYS_ALL_CYCLES_CUMUL|join(" ") }}'
+              {{ workflow.OBS_DAYS_ALL_CYCLES_INST|join(" ") }}'
           datadep_post_files_exist:
             attrs:
               age: 00:00:00:30
