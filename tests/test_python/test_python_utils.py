@@ -127,16 +127,36 @@ class Testing(unittest.TestCase):
             "regional_workflow", util.get_ini_value(cfg, "regional_workflow", "repo_url")
         )
 
+    def test_parse_test_list_get_test_name(self):
+        """ Test getting test names from the names of test configuration files """
+        test_cases = [
+            ("config.MET_verification.yaml", "MET_verification"),
+            ("/path/to/test_configs/deterministic/config.MET_verification.yaml",
+             "MET_verification"),
+            ("config.MET_verification.yaml.old01", None),
+            ("MET_verification.yaml", None),
+            ("config.yaml", None),
+            ("config..yaml", None),
+            ("README.md", None),
+        ]
+        for filename, expected in test_cases:
+            with self.subTest(filename=filename):
+                self.assertEqual(util.get_test_name(filename), expected)
+
     def test_parse_test_list_get_tests_to_run(self):
         """ Test parsing of different --tests arguments formats """
-        # get all existing tests from tests/WE2E/test_configs directory
+        # get all existing tests from tests/WE2E/test_configs directory.  As in
+        # parse_test_list.py, only files of the form config.<test_name>.yaml
+        # are considered test configuration files, so other files (e.g. backups
+        # of test configuration files) are ignored.
         test_configs_dir = Path(self.ushdir).parent / "tests" / "WE2E" / "test_configs"
         test_categories = [f.name for f in os.scandir(test_configs_dir) if f.is_dir()]
         we2e_tests = {}
         for test_category in test_categories:
-            tests = [f.name[7:-5] for f in os.scandir(os.path.join(test_configs_dir, test_category))
+            tests = [util.get_test_name(f.name)
+                     for f in os.scandir(os.path.join(test_configs_dir, test_category))
                      if f.is_file()]
-            we2e_tests[test_category] = tests
+            we2e_tests[test_category] = [test for test in tests if test]
 
         total_test_num = sum(len(tests) for tests in we2e_tests.values())
         all_tests = [item for tests in we2e_tests.values() for item in tests]
