@@ -26,7 +26,16 @@ TEST_FILE_GLOB = f"{TEST_FILE_PREFIX}*{TEST_FILE_SUFFIX}"
 
 CONFIG_YAML_GLOB = f"test_configs/**/{TEST_FILE_GLOB}"
 
-ALL_TESTS = glob.glob(CONFIG_YAML_GLOB, recursive=True, root_dir=TESTS_WE2E_DIR)
+def _glob_test_files(pattern):
+    """
+    Returns the paths (relative to TESTS_WE2E_DIR) of the files matching a glob
+    pattern.  Only files (including symbolic links to files) are returned, not
+    e.g. directories whose names happen to match the pattern.
+    """
+    return [f for f in glob.glob(pattern, recursive=True, root_dir=TESTS_WE2E_DIR)
+            if (TESTS_WE2E_DIR / f).is_file()]
+
+ALL_TESTS = _glob_test_files(CONFIG_YAML_GLOB)
 TEST_DIRS = next(os.walk(os.path.join(TESTS_WE2E_DIR, "test_configs")))[1]
 
 def get_test_name(filename) -> Optional[str]:
@@ -87,10 +96,7 @@ def _get_tests_to_check(args_tests):
         logging.debug(
             f"Will run all tests in test_configs/{user_spec_tests[0]}"
         )
-        tests_in_dir = glob.glob(
-            f"test_configs/{user_spec_tests[0]}/{TEST_FILE_GLOB}", recursive=True,
-            root_dir=TESTS_WE2E_DIR
-        )
+        tests_in_dir = _glob_test_files(f"test_configs/{user_spec_tests[0]}/{TEST_FILE_GLOB}")
         return _get_test_names(tests_in_dir)
 
     # If we have gotten this far then the only option left for user_spec_tests is a
